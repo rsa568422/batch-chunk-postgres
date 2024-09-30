@@ -1,5 +1,7 @@
-package com.example.batch;
+package com.example.batch.application.configuration;
 
+import com.example.batch.infrastructure.entity.DatoEntradaEntity;
+import com.example.batch.infrastructure.entity.DatoSalidaEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -29,11 +31,11 @@ public class BatchConfiguration {
     @Bean
     public Step miStep(JobRepository jobRepository,
                        PlatformTransactionManager transactionManager,
-                       ItemReader<DatoEntrada> reader,
-                       ItemProcessor<DatoEntrada, DatoSalida> processor,
-                       ItemWriter<DatoSalida> writer) {
+                       ItemReader<DatoEntradaEntity> reader,
+                       ItemProcessor<DatoEntradaEntity, DatoSalidaEntity> processor,
+                       ItemWriter<DatoSalidaEntity> writer) {
         return new StepBuilder("batchStep", jobRepository)
-                .<DatoEntrada, DatoSalida>chunk(10, transactionManager)
+                .<DatoEntradaEntity, DatoSalidaEntity>chunk(10, transactionManager)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)

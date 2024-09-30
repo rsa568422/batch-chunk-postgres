@@ -1,4 +1,4 @@
-package com.example.batch;
+package com.example.batch.infrastructure.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "entrada")
-public class DatoEntrada {
+public class DatoEntradaEntity {
 
     @Id
     @GeneratedValue

@@ -1,5 +1,7 @@
-package com.example.batch;
+package com.example.batch.application.service;
 
+import com.example.batch.infrastructure.entity.DatoSalidaEntity;
+import com.example.batch.infrastructure.repository.DatoSalidaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +13,7 @@ public class DatoSalidaService {
 
     private final DatoSalidaRepository repository;
 
-    public void save(List<? extends DatoSalida> items) {
+    public void save(List<? extends DatoSalidaEntity> items) {
         repository.saveAll(items);
     }
 }

@@ -1,5 +1,7 @@
-package com.example.batch;
+package com.example.batch.application.service;
 
+import com.example.batch.infrastructure.entity.DatoEntradaEntity;
+import com.example.batch.infrastructure.repository.DatoEntradaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +13,7 @@ public class DatoEntradaService {
 
     private final DatoEntradaRepository repository;
 
-    public List<DatoEntrada> findAll() {
+    public List<DatoEntradaEntity> findAll() {
         return repository.findAll();
     }
 }
