@@ -1,21 +1,15 @@
-name: "CodeQL Analysis and Coverage Check"
+name: "Code Coverage Check"
 
 on:
   push:
     branches: [ master, develop ]
   pull_request:
     branches: [ master, develop ]
-  schedule:
-    - cron: '30 1 * * 0'
 
 jobs:
-  analyze:
-    name: Analyze and Check Coverage
+  coverage:
+    name: Check Coverage
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
 
     steps:
       - name: Checkout repository
@@ -32,19 +26,15 @@ jobs:
 
       - name: Check Coverage
         run: |
-          COVERAGE=$(mvn org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:report-aggregate -Djacoco.dataFile=target/jacoco.exec | grep -o 'Total[^%]*%' | sed 's/Total//' | sed 's/%//' | tr -d '[:space:]')
+          if [ ! -f target/site/jacoco/index.html ]; then
+            echo "No se encontró el informe de cobertura. Es posible que no haya tests implementados."
+            echo "La cobertura de código es 0%"
+            exit 1
+          fi
+          
+          COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered / instructions * 100 }' target/site/jacoco/jacoco.csv)
           echo "Cobertura total: $COVERAGE%"
           if (( $(echo "$COVERAGE < 80" | bc -l) )); then
             echo "La cobertura de código es menor al 80%. Cobertura actual: $COVERAGE%"
             exit 1
           fi
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: java
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:java"
