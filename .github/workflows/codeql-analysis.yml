@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -30,6 +30,14 @@ jobs:
 
       - name: Build and Test with Maven (including JaCoCo)
         run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install org.jacoco:jacoco-maven-plugin:report
+
+      - name: Run PIT Mutation Testing
+        run: mvn org.pitest:pitest-maven:mutationCoverage
+
+      - name: Display PIT Summary
+        run: |
+          chmod +x .github/scripts/pit_summary.sh
+          .github/scripts/pit_summary.sh > pit_summary.txt
 
       - name: Check JaCoCo Coverage
         run: |
@@ -43,16 +51,10 @@ jobs:
           echo "Cobertura total (JaCoCo): $COVERAGE%"
           if (( $(echo "$COVERAGE < 80" | bc -l) )); then
             echo "La cobertura de código es menor al 80%. Cobertura actual: $COVERAGE%"
+            echo "Informe de PIT:"
+            cat pit_summary.txt
             exit 1
           fi
-
-      - name: Run PIT Mutation Testing
-        run: mvn org.pitest:pitest-maven:mutationCoverage
-
-      - name: Display PIT Summary
-        run: |
-          chmod +x .github/scripts/pit_summary.sh
-          .github/scripts/pit_summary.sh
 
       - name: Upload PIT reports
         uses: actions/upload-artifact@v3

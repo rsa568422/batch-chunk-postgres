@@ -23,7 +23,7 @@ echo "Total de mutaciones: $MUTATIONS_TOTAL"
 echo "Mutaciones eliminadas: $MUTATIONS_KILLED"
 echo "Mutaciones sobrevividas: $MUTATIONS_SURVIVED"
 echo ""
-echo "El informe detallado está disponible en: file://$PWD/$REPORT_DIR/$LATEST_REPORT/index.html"
+echo "El informe detallado de PIT está disponible en: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
 # Verificar umbral de cobertura
 MUTATION_COVERAGE_NUM=$(echo $MUTATION_COVERAGE | sed 's/%//')
