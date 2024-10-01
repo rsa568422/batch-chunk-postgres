@@ -1,4 +1,4 @@
-name: "Code Coverage Check"
+name: "Code Coverage and Mutation Testing"
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ master, develop ]
 
 jobs:
-  coverage:
-    name: Check Coverage
+  coverage-and-mutation:
+    name: Check Coverage and Run Mutation Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -21,20 +21,47 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build and Test with Maven
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and Test with Maven (including JaCoCo)
         run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install org.jacoco:jacoco-maven-plugin:report
 
-      - name: Check Coverage
+      - name: Check JaCoCo Coverage
         run: |
           if [ ! -f target/site/jacoco/index.html ]; then
-            echo "No se encontró el informe de cobertura. Es posible que no haya tests implementados."
+            echo "No se encontró el informe de cobertura de JaCoCo. Es posible que no haya tests implementados."
             echo "La cobertura de código es 0%"
             exit 1
           fi
           
           COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered / instructions * 100 }' target/site/jacoco/jacoco.csv)
-          echo "Cobertura total: $COVERAGE%"
+          echo "Cobertura total (JaCoCo): $COVERAGE%"
           if (( $(echo "$COVERAGE < 80" | bc -l) )); then
             echo "La cobertura de código es menor al 80%. Cobertura actual: $COVERAGE%"
             exit 1
           fi
+
+      - name: Run PIT Mutation Testing
+        run: mvn org.pitest:pitest-maven:mutationCoverage
+
+      - name: Display PIT Summary
+        run: |
+          chmod +x .github/scripts/pit_summary.sh
+          .github/scripts/pit_summary.sh
+
+      - name: Upload PIT reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: pit-reports
+          path: target/pit-reports
+
+      - name: Upload JaCoCo reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: jacoco-reports
+          path: target/site/jacoco
