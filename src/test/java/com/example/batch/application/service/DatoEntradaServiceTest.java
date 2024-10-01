@@ -8,7 +8,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,5 +38,8 @@ class DatoEntradaServiceTest {
                 () -> assertNotNull(actual),
                 () -> assertIterableEquals(Data.DATO_ENTRADA_ENTITIES, actual)
         );
+
+        verify(repository, times(1)).findAll();
+        verifyNoMoreInteractions(repository);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.batch.application;
 
 import com.example.batch.infrastructure.entity.DatoEntradaEntity;
+import com.example.batch.infrastructure.entity.DatoSalidaEntity;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,4 +30,22 @@ public class Data {
 
     public static final List<DatoEntradaEntity> DATO_ENTRADA_ENTITIES =
             List.of(ENTRADA_ENTITY_1, ENTRADA_ENTITY_2, ENTRADA_ENTITY_3);
+
+    public static final DatoSalidaEntity SALIDA_ENTITY_1 = new DatoSalidaEntity(
+            UUID.fromString("cda33687-2f86-4da5-828c-aa7f95a098e3"),
+            BigDecimal.valueOf(360)
+    );
+
+    public static final DatoSalidaEntity SALIDA_ENTITY_2 = new DatoSalidaEntity(
+            UUID.fromString("cf541dc1-7878-4da4-8d49-d53a2d0ccc1e"),
+            BigDecimal.valueOf(150)
+    );
+
+    public static final DatoSalidaEntity SALIDA_ENTITY_3 = new DatoSalidaEntity(
+            UUID.fromString("9c75bdf7-f9ff-4a79-8c7e-1a5f62401971"),
+            BigDecimal.valueOf(200)
+    );
+
+    public static final List<DatoSalidaEntity> DATO_SALIDA_ENTITIES =
+            List.of(SALIDA_ENTITY_1, SALIDA_ENTITY_2, SALIDA_ENTITY_3);
 }
