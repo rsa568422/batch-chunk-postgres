@@ -55,13 +55,13 @@ jobs:
           .github/scripts/pit_summary.sh
 
       - name: Upload PIT reports
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: pit-reports
           path: target/pit-reports
 
       - name: Upload JaCoCo reports
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jacoco-reports
           path: target/site/jacoco
