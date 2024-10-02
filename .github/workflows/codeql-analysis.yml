@@ -1,35 +1,20 @@
-name: "CodeQL Analysis"
+name: "Code Coverage and Mutation Testing"
 
 on:
   push:
     branches: [ master, develop ]
   pull_request:
     branches: [ master, develop ]
-  schedule:
-    - cron: '30 1 * * 0'
 
 jobs:
-  analyze:
-    name: Analyze
+  coverage-and-mutation:
+    name: Check Coverage and Run Mutation Tests
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ 'java' ]
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -37,13 +22,78 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+      - name: Cache Maven packages
+        uses: actions/cache@v3
         with:
-          category: "/language:${{matrix.language}}"
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-    # Eliminamos el paso de subir el archivo SARIF manualmente
-    # ya que la acción analyze se encarga de esto automáticamente
+      - name: Build and Test with Maven (including JaCoCo)
+        run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install org.jacoco:jacoco-maven-plugin:report
+
+      - name: Run PIT Mutation Testing
+        run: mvn org.pitest:pitest-maven:mutationCoverage
+
+      - name: Check PIT reports
+        run: |
+          echo "Contenido de target/pit-reports:"
+          ls -R target/pit-reports
+          
+          echo "\nResumen del informe PIT:"
+          grep -A 7 "<tbody>" target/pit-reports/index.html | tail -n 4 | sed 's/<[^>]*>//g' | sed 's/^ *//g'
+
+      - name: Check JaCoCo Coverage
+        run: |
+          if [ ! -f target/site/jacoco/index.html ]; then
+            echo "No se encontró el informe de cobertura de JaCoCo. Es posible que no haya tests implementados."
+            echo "La cobertura de código es 0%"
+            exit 1
+          fi
+          
+          COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered / instructions * 100 }' target/site/jacoco/jacoco.csv)
+          echo "Cobertura total (JaCoCo): $COVERAGE%"
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "La cobertura de código es menor al 80%. Cobertura actual: $COVERAGE%"
+            exit 1
+          fi
+
+      - name: Display PIT Summary
+        run: |
+          if [ -f .github/scripts/pit_summary.sh ]; then
+            chmod +x .github/scripts/pit_summary.sh
+            .github/scripts/pit_summary.sh > pit_summary.txt
+            cat pit_summary.txt
+          else
+            echo "No se encontró el script pit_summary.sh"
+          fi
+
+      - name: Upload PIT reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: pit-reports
+          path: target/pit-reports
+        if: always()
+
+      - name: Upload JaCoCo reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-reports
+          path: target/site/jacoco
+        if: always()
+
+      - name: Provide instructions for viewing reports
+        run: |
+          echo "Para ver los informes completos:"
+          echo "1. Ve a la pestaña 'Actions' en GitHub"
+          echo "2. Haz clic en esta ejecución del workflow (Run #${{ github.run_number }})"
+          echo "3. Desplázate hasta la sección 'Artifacts'"
+          echo "4. Descarga los artefactos 'pit-reports' y 'jacoco-reports'"
+          echo "5. Descomprime los archivos y abre los archivos index.html en tu navegador"
+          echo ""
+          echo "Alternativamente, si tienes GitHub CLI instalado, puedes usar los siguientes comandos:"
+          echo "gh run download ${{ github.run_id }} -n pit-reports"
+          echo "gh run download ${{ github.run_id }} -n jacoco-reports"
+          echo ""
+          echo "URL de esta ejecución del workflow:"
+          echo "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
