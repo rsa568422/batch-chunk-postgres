@@ -1,4 +1,4 @@
-package com.example.batch.application;
+package com.example.batch;
 
 import com.example.batch.infrastructure.entity.DatoEntradaEntity;
 import com.example.batch.infrastructure.entity.DatoSalidaEntity;

@@ -21,19 +21,19 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class BatchConfiguration {
 
     @Bean
-    public Job miJob(JobRepository jobRepository, Step miStep) {
+    public Job job(JobRepository jobRepository, Step step) {
         return new JobBuilder("batchJob", jobRepository)
-                .start(miStep)
+                .start(step)
                 .incrementer(new RunIdIncrementer())
                 .build();
     }
 
     @Bean
-    public Step miStep(JobRepository jobRepository,
-                       PlatformTransactionManager transactionManager,
-                       ItemReader<DatoEntradaEntity> reader,
-                       ItemProcessor<DatoEntradaEntity, DatoSalidaEntity> processor,
-                       ItemWriter<DatoSalidaEntity> writer) {
+    public Step step(JobRepository jobRepository,
+                     PlatformTransactionManager transactionManager,
+                     ItemReader<DatoEntradaEntity> reader,
+                     ItemProcessor<DatoEntradaEntity, DatoSalidaEntity> processor,
+                     ItemWriter<DatoSalidaEntity> writer) {
         return new StepBuilder("batchStep", jobRepository)
                 .<DatoEntradaEntity, DatoSalidaEntity>chunk(10, transactionManager)
                 .reader(reader)

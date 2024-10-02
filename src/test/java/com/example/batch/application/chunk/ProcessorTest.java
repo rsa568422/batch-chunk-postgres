@@ -1,6 +1,6 @@
 package com.example.batch.application.chunk;
 
-import com.example.batch.application.Data;
+import com.example.batch.Data;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

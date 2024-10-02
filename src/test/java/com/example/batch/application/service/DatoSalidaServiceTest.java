@@ -1,6 +1,6 @@
 package com.example.batch.application.service;
 
-import com.example.batch.application.Data;
+import com.example.batch.Data;
 import com.example.batch.infrastructure.repository.DatoSalidaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
