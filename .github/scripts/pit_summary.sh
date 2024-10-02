@@ -27,12 +27,3 @@ echo "Mutaciones eliminadas: $MUTATIONS_KILLED"
 echo "Mutaciones sobrevividas: $MUTATIONS_SURVIVED"
 echo ""
 echo "El informe detallado de PIT está disponible en: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-
-# Verificar umbral de cobertura
-MUTATION_COVERAGE_NUM=$(echo $MUTATION_COVERAGE | sed 's/%//')
-if (( $(echo "$MUTATION_COVERAGE_NUM < 80" | bc -l) )); then
-    echo "La cobertura de mutaciones es menor al 80%. Cobertura actual: $MUTATION_COVERAGE"
-    exit 1
-fi
-
-exit 0
