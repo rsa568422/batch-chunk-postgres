@@ -1,10 +1,13 @@
 #!/bin/bash
 
 REPORT_DIR="target/pit-reports"
+echo "Buscando informes en: $REPORT_DIR"
+
 LATEST_REPORT=$(ls -t $REPORT_DIR | head -n1)
+echo "Último informe encontrado: $LATEST_REPORT"
 
 if [ ! -d "$REPORT_DIR/$LATEST_REPORT" ]; then
-    echo "No se encontró el informe de PIT. Asegúrate de haber ejecutado las pruebas de mutación."
+    echo "No se encontró el informe de PIT en $REPORT_DIR/$LATEST_REPORT"
     exit 1
 fi
 
