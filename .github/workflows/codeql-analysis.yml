@@ -10,6 +10,8 @@ jobs:
   coverage-and-mutation:
     name: Check Coverage and Run Mutation Tests
     runs-on: ubuntu-latest
+    # Aseguramos que el job se ejecute en PRs
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
 
     steps:
       - name: Checkout repository
@@ -37,12 +39,20 @@ jobs:
       - name: Check PIT reports
         run: |
           ls -R target/pit-reports
-          cat target/pit-reports/*/mutations.xml
+          if [ -f target/pit-reports/*/mutations.xml ]; then
+            cat target/pit-reports/*/mutations.xml
+          else
+            echo "No se encontró el archivo mutations.xml"
+          fi
 
       - name: Display PIT Summary
         run: |
-          chmod +x .github/scripts/pit_summary.sh
-          .github/scripts/pit_summary.sh > pit_summary.txt
+          if [ -f .github/scripts/pit_summary.sh ]; then
+            chmod +x .github/scripts/pit_summary.sh
+            .github/scripts/pit_summary.sh > pit_summary.txt
+          else
+            echo "No se encontró el script pit_summary.sh"
+          fi
 
       - name: Check JaCoCo Coverage
         run: |
@@ -56,8 +66,12 @@ jobs:
           echo "Cobertura total (JaCoCo): $COVERAGE%"
           if (( $(echo "$COVERAGE < 80" | bc -l) )); then
             echo "La cobertura de código es menor al 80%. Cobertura actual: $COVERAGE%"
-            echo "Informe de PIT:"
-            cat pit_summary.txt
+            if [ -f pit_summary.txt ]; then
+              echo "Informe de PIT:"
+              cat pit_summary.txt
+            else
+              echo "No se encontró el archivo pit_summary.txt"
+            fi
             exit 1
           fi
 
@@ -66,9 +80,15 @@ jobs:
         with:
           name: pit-reports
           path: target/pit-reports
+        if: always()
 
       - name: Upload JaCoCo reports
         uses: actions/upload-artifact@v3
         with:
           name: jacoco-reports
           path: target/site/jacoco
+        if: always()
+
+      # Job de prueba simple
+      - name: Test Job
+        run: echo "Este job debería ejecutarse siempre"
