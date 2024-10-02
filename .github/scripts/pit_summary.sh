@@ -3,20 +3,25 @@
 REPORT_DIR="target/pit-reports"
 echo "Buscando informes en: $REPORT_DIR"
 
-LATEST_REPORT=$(ls -t $REPORT_DIR | head -n1)
-echo "Último informe encontrado: $LATEST_REPORT"
+if [ ! -d "$REPORT_DIR" ]; then
+    echo "No se encontró el directorio de informes de PIT: $REPORT_DIR"
+    exit 1
+fi
 
-if [ ! -d "$REPORT_DIR/$LATEST_REPORT" ]; then
-    echo "No se encontró el informe de PIT en $REPORT_DIR/$LATEST_REPORT"
+INDEX_HTML="$REPORT_DIR/index.html"
+if [ ! -f "$INDEX_HTML" ]; then
+    echo "No se encontró el archivo index.html en $REPORT_DIR"
+    echo "Contenido del directorio $REPORT_DIR:"
+    ls -R "$REPORT_DIR"
     exit 1
 fi
 
 # Extraer estadísticas del informe
-MUTATIONS_TOTAL=$(grep -oP 'Number of mutations:\s*\K\d+' "$REPORT_DIR/$LATEST_REPORT/index.html")
-MUTATIONS_KILLED=$(grep -oP 'Mutations killed:\s*\K\d+' "$REPORT_DIR/$LATEST_REPORT/index.html")
-MUTATIONS_SURVIVED=$(grep -oP 'Mutations survived:\s*\K\d+' "$REPORT_DIR/$LATEST_REPORT/index.html")
-LINE_COVERAGE=$(grep -oP 'Line Coverage:\s*\K[\d.]+%' "$REPORT_DIR/$LATEST_REPORT/index.html")
-MUTATION_COVERAGE=$(grep -oP 'Mutation Coverage:\s*\K[\d.]+%' "$REPORT_DIR/$LATEST_REPORT/index.html")
+MUTATIONS_TOTAL=$(grep -oP 'Number of mutations:\s*\K\d+' "$INDEX_HTML" || echo "N/A")
+MUTATIONS_KILLED=$(grep -oP 'Mutations killed:\s*\K\d+' "$INDEX_HTML" || echo "N/A")
+MUTATIONS_SURVIVED=$(grep -oP 'Mutations survived:\s*\K\d+' "$INDEX_HTML" || echo "N/A")
+LINE_COVERAGE=$(grep -oP 'Line Coverage:\s*\K[\d.]+%' "$INDEX_HTML" || echo "N/A")
+MUTATION_COVERAGE=$(grep -oP 'Mutation Coverage:\s*\K[\d.]+%' "$INDEX_HTML" || echo "N/A")
 
 echo "Resumen de PIT Mutation Testing (Java 17):"
 echo "--------------------------------"

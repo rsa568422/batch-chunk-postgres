@@ -37,6 +37,63 @@ jobs:
 
       - name: Check PIT reports
         run: |
+          echo "Contenido de target/pit-reports:"
           ls -R target/pit-reports
-          if [ -f target/pit-reports/*/mutations.xml ]; then
-            cat target/pit-reports/*/mutations.xml
+          
+          echo "\nBuscando mutations.xml:"
+          find target/pit-reports -name mutations.xml
+          
+          MUTATIONS_XML=$(find target/pit-reports -name mutations.xml)
+          if [ -n "$MUTATIONS_XML" ]; then
+            echo "\nContenido de mutations.xml:"
+            cat "$MUTATIONS_XML"
+          else
+            echo "\nNo se encontró el archivo mutations.xml"
+            echo "Contenido del directorio pit-reports:"
+            find target/pit-reports -type f
+          fi
+          
+          echo "\nContenido de index.html:"
+          cat target/pit-reports/index.html
+
+      - name: Check JaCoCo Coverage
+        run: |
+          if [ ! -f target/site/jacoco/index.html ]; then
+            echo "No se encontró el informe de cobertura de JaCoCo. Es posible que no haya tests implementados."
+            echo "La cobertura de código es 0%"
+            exit 1
+          fi
+          
+          COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered / instructions * 100 }' target/site/jacoco/jacoco.csv)
+          echo "Cobertura total (JaCoCo): $COVERAGE%"
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "La cobertura de código es menor al 80%. Cobertura actual: $COVERAGE%"
+            exit 1
+          fi
+
+      - name: Display PIT Summary
+        run: |
+          if [ -f .github/scripts/pit_summary.sh ]; then
+            chmod +x .github/scripts/pit_summary.sh
+            .github/scripts/pit_summary.sh > pit_summary.txt
+            cat pit_summary.txt
+          else
+            echo "No se encontró el script pit_summary.sh"
+          fi
+
+      - name: Upload PIT reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: pit-reports
+          path: target/pit-reports
+        if: always()
+
+      - name: Upload JaCoCo reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-reports
+          path: target/site/jacoco
+        if: always()
+
+      - name: Test Job
+        run: echo "Este job debería ejecutarse siempre"
