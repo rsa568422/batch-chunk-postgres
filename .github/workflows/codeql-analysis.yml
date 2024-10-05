@@ -90,16 +90,30 @@ jobs:
           TOTAL_COVERED=0
           for MODULE in "${MODULES[@]}"; do
             JACOCO_CSV="$MODULE/target/site/jacoco/jacoco.csv"
+            echo "Buscando archivo $JACOCO_CSV"
             if [ -f "$JACOCO_CSV" ]; then
+              echo "Contenido de $JACOCO_CSV:"
+              cat "$JACOCO_CSV"
               MODULE_INSTRUCTIONS=$(awk -F"," '{ instructions += $4 + $5 } END { print instructions }' "$JACOCO_CSV")
               MODULE_COVERED=$(awk -F"," '{ covered += $5 } END { print covered }' "$JACOCO_CSV")
+              echo "Instrucciones totales para $MODULE: $MODULE_INSTRUCTIONS"
+              echo "Instrucciones cubiertas para $MODULE: $MODULE_COVERED"
               TOTAL_INSTRUCTIONS=$((TOTAL_INSTRUCTIONS + MODULE_INSTRUCTIONS))
               TOTAL_COVERED=$((TOTAL_COVERED + MODULE_COVERED))
-              echo "Cobertura para $MODULE: $((MODULE_COVERED * 100 / MODULE_INSTRUCTIONS))%"
+              if [ $MODULE_INSTRUCTIONS -eq 0 ]; then
+                echo "Advertencia: No hay instrucciones para $MODULE"
+                MODULE_COVERAGE=0
+              else
+                MODULE_COVERAGE=$((MODULE_COVERED * 100 / MODULE_INSTRUCTIONS))
+              fi
+              echo "Cobertura para $MODULE: $MODULE_COVERAGE%"
             else
               echo "No se encontró el archivo jacoco.csv para el módulo $MODULE"
             fi
           done
+          
+          echo "Total de instrucciones: $TOTAL_INSTRUCTIONS"
+          echo "Total de instrucciones cubiertas: $TOTAL_COVERED"
           
           if [ $TOTAL_INSTRUCTIONS -eq 0 ]; then
             echo "No se encontraron datos de cobertura"
@@ -111,6 +125,8 @@ jobs:
           if [ $COVERAGE -lt 80 ]; then
             echo "La cobertura de código es menor al 80%. Cobertura actual: $COVERAGE%"
             exit 1
+          else
+            echo "La cobertura de código es igual o superior al 80%. Cobertura actual: $COVERAGE%"
           fi
 
       - name: Upload PIT reports
