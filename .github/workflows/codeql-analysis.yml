@@ -54,28 +54,39 @@ jobs:
           echo "Ejecutando Maven para generar el informe de cobertura..."
           mvn org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:report-aggregate -Djacoco.outputDirectory=./target/site/jacoco-aggregate -Djacoco.dataFile=./target/jacoco.exec
           
-          echo "Contenido del directorio target:"
-          ls -R ./target
-          
           echo "Buscando el archivo de informe de cobertura..."
           REPORT_FILE=$(find ./target -name "index.html" | grep -m 1 "jacoco-aggregate")
           
           if [ -f "$REPORT_FILE" ]; then
             echo "Archivo de informe encontrado: $REPORT_FILE"
-            echo "Contenido del archivo de informe:"
-            cat "$REPORT_FILE"
           
-            COVERAGE=$(grep -oP 'Total.*?([0-9]{1,3}([.][0-9])?)%' "$REPORT_FILE" | grep -oP '[0-9]{1,3}([.][0-9])?' | head -1)
-            if [ -n "$COVERAGE" ]; then
-              echo "Cobertura extraída: $COVERAGE%"
-              if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-                echo "La cobertura está por debajo del 80%. Actual: $COVERAGE%"
-                exit 1
+            echo "Primeras 50 líneas del archivo de informe:"
+            head -n 50 "$REPORT_FILE"
+          
+            # Buscar la línea que contiene el porcentaje de cobertura total
+            COVERAGE_LINE=$(grep -A 1 '<tfoot>' "$REPORT_FILE" | tail -n 1)
+          
+            if [ -n "$COVERAGE_LINE" ]; then
+              # Extraer el porcentaje de cobertura
+              COVERAGE=$(echo "$COVERAGE_LINE" | grep -oP '(?<=<td class="ctr2">)[0-9]+%')
+          
+              if [ -n "$COVERAGE" ]; then
+                COVERAGE_NUM=${COVERAGE%\%}
+                echo "Cobertura extraída: $COVERAGE"
+          
+                if [ "$COVERAGE_NUM" -lt 80 ]; then
+                  echo "La cobertura está por debajo del 80%. Actual: $COVERAGE"
+                  exit 1
+                else
+                  echo "La cobertura está por encima o igual al 80%. Actual: $COVERAGE"
+                fi
               else
-                echo "La cobertura está por encima o igual al 80%. Actual: $COVERAGE%"
+                echo "No se pudo extraer el porcentaje de cobertura del archivo"
+                echo "Línea de cobertura encontrada: $COVERAGE_LINE"
+                exit 1
               fi
             else
-              echo "No se pudo extraer el porcentaje de cobertura del archivo"
+              echo "No se encontró la línea de cobertura total en el archivo"
               exit 1
             fi
           else
