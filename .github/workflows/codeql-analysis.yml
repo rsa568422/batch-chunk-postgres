@@ -62,21 +62,24 @@ jobs:
           
           if [ -f "$REPORT_FILE" ]; then
             echo "Archivo de informe encontrado: $REPORT_FILE"
-            COVERAGE=$(grep -oP 'Total.*?([0-9]{1,3})%' "$REPORT_FILE" | awk '{print $NF}' | sed 's/%//')
-            echo "Cobertura extraída: $COVERAGE"
-          else
-            echo "No se encontró el archivo de informe de cobertura"
-            exit 1
-          fi
+            echo "Contenido del archivo de informe:"
+            cat "$REPORT_FILE"
           
-          if [ -n "$COVERAGE" ]; then
-            echo "Cobertura total: $COVERAGE%"
-            if [ "$COVERAGE" -lt 80 ]; then
-              echo "La cobertura está por debajo del 80%. Actual: $COVERAGE%"
+            COVERAGE=$(grep -oP 'Total.*?([0-9]{1,3}([.][0-9])?)%' "$REPORT_FILE" | grep -oP '[0-9]{1,3}([.][0-9])?' | head -1)
+            if [ -n "$COVERAGE" ]; then
+              echo "Cobertura extraída: $COVERAGE%"
+              if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+                echo "La cobertura está por debajo del 80%. Actual: $COVERAGE%"
+                exit 1
+              else
+                echo "La cobertura está por encima o igual al 80%. Actual: $COVERAGE%"
+              fi
+            else
+              echo "No se pudo extraer el porcentaje de cobertura del archivo"
               exit 1
             fi
           else
-            echo "No se pudo extraer el porcentaje de cobertura"
+            echo "No se encontró el archivo de informe de cobertura"
             exit 1
           fi
         shell: bash
