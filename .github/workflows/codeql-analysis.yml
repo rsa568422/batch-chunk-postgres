@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -30,6 +32,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Set permissions
+        run: chmod -R 777 .
+
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -41,7 +46,10 @@ jobs:
         run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install org.jacoco:jacoco-maven-plugin:report
 
       - name: Run PIT Mutation Testing
-        run: mvn org.pitest:pitest-maven:mutationCoverage
+        run: |
+          mvn org.pitest:pitest-maven:mutationCoverage -X
+          echo "Contenido del directorio target:"
+          ls -R target
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -50,11 +58,18 @@ jobs:
 
       - name: Check PIT reports
         run: |
-          echo "Contenido de target/pit-reports:"
-          ls -R target/pit-reports
+          echo "Contenido del directorio target:"
+          ls -R target
           
-          echo "\nResumen del informe PIT:"
-          grep -A 7 "<tbody>" target/pit-reports/index.html | tail -n 4 | sed 's/<[^>]*>//g' | sed 's/^ *//g'
+          if [ -d "target/pit-reports" ]; then
+            echo "Contenido de target/pit-reports:"
+            ls -R target/pit-reports
+            echo "\nResumen del informe PIT:"
+            grep -A 7 "<tbody>" target/pit-reports/index.html | tail -n 4 | sed 's/<[^>]*>//g' | sed 's/^ *//g'
+          else
+            echo "El directorio target/pit-reports no existe"
+            exit 1
+          fi
 
       - name: Check JaCoCo Coverage
         run: |

@@ -119,11 +119,12 @@
 					</dependency>
 				</dependencies>
 				<configuration>
+					<outputDirectory>${project.build.directory}/pit-reports</outputDirectory>
 					<targetClasses>
-						<param>com.example.batch.*</param>
+						<param>com.example.*</param>
 					</targetClasses>
 					<targetTests>
-						<param>com.example.batch.*</param>
+						<param>com.example.*</param>
 					</targetTests>
 				</configuration>
 			</plugin>
