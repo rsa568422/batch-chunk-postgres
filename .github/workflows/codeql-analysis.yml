@@ -60,33 +60,31 @@ jobs:
           if [ -f "$REPORT_FILE" ]; then
             echo "Archivo de informe encontrado: $REPORT_FILE"
           
-            echo "Primeras 50 líneas del archivo de informe:"
-            head -n 50 "$REPORT_FILE"
+            echo "Contenido completo del archivo de informe:"
+            cat "$REPORT_FILE"
           
-            # Buscar la línea que contiene el porcentaje de cobertura total
-            COVERAGE_LINE=$(grep -A 1 '<tfoot>' "$REPORT_FILE" | tail -n 1)
+            echo "Buscando línea de cobertura..."
+            COVERAGE_LINE=$(grep -E 'Total.*?[0-9]+%' "$REPORT_FILE")
           
             if [ -n "$COVERAGE_LINE" ]; then
-              # Extraer el porcentaje de cobertura
-              COVERAGE=$(echo "$COVERAGE_LINE" | grep -oP '(?<=<td class="ctr2">)[0-9]+%')
+              echo "Línea de cobertura encontrada: $COVERAGE_LINE"
+              COVERAGE=$(echo "$COVERAGE_LINE" | grep -oP '[0-9]+(?=%)')
           
               if [ -n "$COVERAGE" ]; then
-                COVERAGE_NUM=${COVERAGE%\%}
-                echo "Cobertura extraída: $COVERAGE"
+                echo "Cobertura extraída: $COVERAGE%"
           
-                if [ "$COVERAGE_NUM" -lt 80 ]; then
-                  echo "La cobertura está por debajo del 80%. Actual: $COVERAGE"
+                if [ "$COVERAGE" -lt 80 ]; then
+                  echo "La cobertura está por debajo del 80%. Actual: $COVERAGE%"
                   exit 1
                 else
-                  echo "La cobertura está por encima o igual al 80%. Actual: $COVERAGE"
+                  echo "La cobertura está por encima o igual al 80%. Actual: $COVERAGE%"
                 fi
               else
-                echo "No se pudo extraer el porcentaje de cobertura del archivo"
-                echo "Línea de cobertura encontrada: $COVERAGE_LINE"
+                echo "No se pudo extraer el porcentaje de cobertura de la línea"
                 exit 1
               fi
             else
-              echo "No se encontró la línea de cobertura total en el archivo"
+              echo "No se encontró la línea de cobertura en el archivo"
               exit 1
             fi
           else
