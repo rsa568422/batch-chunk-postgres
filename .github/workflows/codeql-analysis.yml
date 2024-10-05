@@ -65,27 +65,50 @@ jobs:
 
       - name: Check PIT reports
         run: |
-          if [ -d "target/pit-reports" ]; then
-            echo "Contenido de target/pit-reports:"
-            ls -R target/pit-reports
-            echo "\nResumen del informe PIT:"
-            grep -A 7 "<tbody>" target/pit-reports/index.html | tail -n 4 | sed 's/<[^>]*>//g' | sed 's/^ *//g'
-          else
-            echo "El directorio target/pit-reports no existe"
-            find . -name "pit-reports" -type d
+          MODULES=("infrastructure" "application" "domain")
+          for MODULE in "${MODULES[@]}"; do
+            if [ -d "$MODULE/target/pit-reports" ]; then
+              echo "Contenido de $MODULE/target/pit-reports:"
+              ls -R $MODULE/target/pit-reports
+              echo "\nResumen del informe PIT para $MODULE:"
+              grep -A 7 "<tbody>" $MODULE/target/pit-reports/index.html | tail -n 4 | sed 's/<[^>]*>//g' | sed 's/^ *//g'
+            else
+              echo "El directorio $MODULE/target/pit-reports no existe"
+            fi
+          done
+          
+          # Verificar si al menos un módulo tiene informes PIT
+          if ! ls */target/pit-reports 1> /dev/null 2>&1; then
+            echo "No se encontraron informes PIT en ningún módulo"
             exit 1
           fi
 
       - name: Check JaCoCo Coverage
         run: |
-          JACOCO_CSV=$(find . -name "jacoco.csv")
-          if [ -z "$JACOCO_CSV" ]; then
-            echo "No se encontró el archivo jacoco.csv"
+          MODULES=("infrastructure" "application" "domain")
+          TOTAL_INSTRUCTIONS=0
+          TOTAL_COVERED=0
+          for MODULE in "${MODULES[@]}"; do
+            JACOCO_CSV="$MODULE/target/site/jacoco/jacoco.csv"
+            if [ -f "$JACOCO_CSV" ]; then
+              MODULE_INSTRUCTIONS=$(awk -F"," '{ instructions += $4 + $5 } END { print instructions }' "$JACOCO_CSV")
+              MODULE_COVERED=$(awk -F"," '{ covered += $5 } END { print covered }' "$JACOCO_CSV")
+              TOTAL_INSTRUCTIONS=$((TOTAL_INSTRUCTIONS + MODULE_INSTRUCTIONS))
+              TOTAL_COVERED=$((TOTAL_COVERED + MODULE_COVERED))
+              echo "Cobertura para $MODULE: $((MODULE_COVERED * 100 / MODULE_INSTRUCTIONS))%"
+            else
+              echo "No se encontró el archivo jacoco.csv para el módulo $MODULE"
+            fi
+          done
+          
+          if [ $TOTAL_INSTRUCTIONS -eq 0 ]; then
+            echo "No se encontraron datos de cobertura"
             exit 1
           fi
-          COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered / instructions * 100 }' "$JACOCO_CSV")
+          
+          COVERAGE=$((TOTAL_COVERED * 100 / TOTAL_INSTRUCTIONS))
           echo "Cobertura total (JaCoCo): $COVERAGE%"
-          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          if [ $COVERAGE -lt 80 ]; then
             echo "La cobertura de código es menor al 80%. Cobertura actual: $COVERAGE%"
             exit 1
           fi
@@ -94,14 +117,16 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: pit-reports
-          path: target/pit-reports
+          path: |
+            */target/pit-reports
         if: always()
 
       - name: Upload JaCoCo reports
         uses: actions/upload-artifact@v3
         with:
           name: jacoco-reports
-          path: target/site/jacoco
+          path: |
+            */target/site/jacoco
         if: always()
 
       - name: Provide instructions for viewing reports
