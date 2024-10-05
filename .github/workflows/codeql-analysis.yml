@@ -45,7 +45,8 @@ jobs:
           pwd
           echo "Directory contents before build:"
           ls -R
-          mvn clean verify org.jacoco:jacoco-maven-plugin:report
+          mvn clean install -DskipTests
+          mvn verify org.jacoco:jacoco-maven-plugin:report
           echo "Directory contents after build:"
           ls -R
 
