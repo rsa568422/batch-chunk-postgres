@@ -32,9 +32,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set permissions
-        run: chmod -R 777 .
-
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -42,14 +39,24 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Build and Test with Maven (including JaCoCo)
-        run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install org.jacoco:jacoco-maven-plugin:report
+      - name: Build and Test with Maven
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Directory contents before build:"
+          ls -R
+          mvn clean install
+          echo "Directory contents after build:"
+          ls -R
+
+      - name: Run JaCoCo
+        run: mvn org.jacoco:jacoco-maven-plugin:report
 
       - name: Run PIT Mutation Testing
         run: |
-          mvn org.pitest:pitest-maven:mutationCoverage -X
-          echo "Contenido del directorio target:"
-          ls -R target
+          mvn org.pitest:pitest-maven:mutationCoverage
+          echo "Directory contents after PIT:"
+          ls -R
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -58,9 +65,6 @@ jobs:
 
       - name: Check PIT reports
         run: |
-          echo "Contenido del directorio target:"
-          ls -R target
-          
           if [ -d "target/pit-reports" ]; then
             echo "Contenido de target/pit-reports:"
             ls -R target/pit-reports
@@ -68,18 +72,18 @@ jobs:
             grep -A 7 "<tbody>" target/pit-reports/index.html | tail -n 4 | sed 's/<[^>]*>//g' | sed 's/^ *//g'
           else
             echo "El directorio target/pit-reports no existe"
+            find . -name "pit-reports" -type d
             exit 1
           fi
 
       - name: Check JaCoCo Coverage
         run: |
-          if [ ! -f target/site/jacoco/index.html ]; then
-            echo "No se encontró el informe de cobertura de JaCoCo. Es posible que no haya tests implementados."
-            echo "La cobertura de código es 0%"
+          JACOCO_CSV=$(find . -name "jacoco.csv")
+          if [ -z "$JACOCO_CSV" ]; then
+            echo "No se encontró el archivo jacoco.csv"
             exit 1
           fi
-          
-          COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered / instructions * 100 }' target/site/jacoco/jacoco.csv)
+          COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered / instructions * 100 }' "$JACOCO_CSV")
           echo "Cobertura total (JaCoCo): $COVERAGE%"
           if (( $(echo "$COVERAGE < 80" | bc -l) )); then
             echo "La cobertura de código es menor al 80%. Cobertura actual: $COVERAGE%"
