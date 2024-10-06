@@ -11,11 +11,14 @@ for MODULE in domain infrastructure application; do
         echo "Buscando 'Mutation Coverage':"
         grep "Mutation Coverage" "$PIT_REPORT"
 
-        echo "Intentando extraer el porcentaje de Mutation Coverage:"
-        MUTATION_SCORE=$(sed -n '/<h3>Project Summary<\/h3>/,/<\/tbody>/p' "$PIT_REPORT" |
-                         grep -oP '<td>\K\d+(?=% <div class="coverage_bar">.*?Mutation Coverage)' |
-                         head -n1)
+        echo "Contenido de la sección Project Summary:"
+        sed -n '/<h3>Project Summary<\/h3>/,/<\/tbody>/p' "$PIT_REPORT"
 
+        echo "Intentando extraer el porcentaje de Mutation Coverage:"
+        MUTATION_LINE=$(sed -n '/<h3>Project Summary<\/h3>/,/<\/tbody>/p' "$PIT_REPORT" | grep "Mutation Coverage")
+        echo "Línea de Mutation Coverage: $MUTATION_LINE"
+
+        MUTATION_SCORE=$(echo "$MUTATION_LINE" | grep -oP '\d+(?=%)')
         echo "MUTATION_SCORE extraído: $MUTATION_SCORE"
 
         if [ -n "$MUTATION_SCORE" ]; then
