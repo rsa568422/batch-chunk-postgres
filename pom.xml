@@ -17,6 +17,7 @@
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 		<commons-lang3.veersion>3.14.0</commons-lang3.veersion>
 		<maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+		<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
 		<pitest-maven.version>1.9.0</pitest-maven.version>
 		<pitest-junit5-plugin.version>1.1.0</pitest-junit5-plugin.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
@@ -101,33 +102,6 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>org.pitest</groupId>
-				<artifactId>pitest-maven</artifactId>
-				<version>${pitest-maven.version}</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.pitest</groupId>
-						<artifactId>pitest-junit5-plugin</artifactId>
-						<version>${pitest-junit5-plugin.version}</version>
-					</dependency>
-				</dependencies>
-				<configuration>
-					<outputFormats>
-						<outputFormat>XML</outputFormat>
-						<outputFormat>HTML</outputFormat>
-					</outputFormats>
-					<targetClasses>
-						<param>com.example.*</param>
-					</targetClasses>
-					<targetTests>
-						<param>com.example.*</param>
-					</targetTests>
-					<failWhenNoMutations>false</failWhenNoMutations>
-				</configuration>
-			</plugin>
-		</plugins>
 	</build>
 
 </project>
