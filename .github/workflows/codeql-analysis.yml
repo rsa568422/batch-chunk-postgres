@@ -21,16 +21,21 @@ jobs:
           cache: maven
 
       - name: Build with Maven and run tests
-        run: mvn clean verify
+        run: mvn clean verify -B
 
       - name: Debug - List JaCoCo reports
         run: find . -name "jacoco*.csv" -o -name "jacoco*.xml"
+
+      - name: Debug - Print test results
+        run: mvn surefire-report:report-only
 
       - name: Check coverage and print percentage
         run: |
           JACOCO_CSV=$(find . -name "jacoco.csv" | head -n 1)
           if [ -f "$JACOCO_CSV" ]; then
             echo "Usando archivo de cobertura: $JACOCO_CSV"
+            echo "Contenido del archivo de cobertura:"
+            cat "$JACOCO_CSV"
             COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print (instructions > 0) ? (covered / instructions * 100) : 0 }' "$JACOCO_CSV")
             echo "Cobertura de código: $COVERAGE%"
             if (( $(echo "$COVERAGE < 80" | bc -l) )); then
@@ -41,23 +46,8 @@ jobs:
               exit 1
             fi
           else
-            echo "No se encontró el archivo jacoco.csv. Verificando jacoco.xml..."
-            JACOCO_XML=$(find . -name "jacoco.xml" | head -n 1)
-            if [ -f "$JACOCO_XML" ]; then
-              echo "Usando archivo de cobertura: $JACOCO_XML"
-              COVERAGE=$(xmllint --xpath "string(//report/counter[@type='INSTRUCTION']/@covered) div string(//report/counter[@type='INSTRUCTION']/@covered + //report/counter[@type='INSTRUCTION']/@missed) * 100" "$JACOCO_XML")
-              echo "Cobertura de código: $COVERAGE%"
-              if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-                echo "La cobertura de código es menor al 80%."
-                echo "Por favor, revisa tus pruebas y asegúrate de que cubran al menos el 80% del código."
-                echo "Cobertura actual: $COVERAGE%"
-                echo "Cobertura requerida: 80%"
-                exit 1
-              fi
-            else
-              echo "No se encontraron archivos de informe de JaCoCo. Verifica la configuración de JaCoCo en tu pom.xml"
-              exit 1
-            fi
+            echo "No se encontró el archivo jacoco.csv"
+            exit 1
           fi
 
       - name: Run PIT mutation testing
