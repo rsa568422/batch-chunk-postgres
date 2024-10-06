@@ -33,10 +33,10 @@ jobs:
               echo "Procesando informe de $MODULE: $PIT_REPORT"
           
               # Extrae la información de cobertura de líneas
-              LINE_COVERAGE=$(grep -oP 'Line Coverage.*?(\d+)%' "$PIT_REPORT" | awk '{print $NF}' | sed 's/%//')
-              COVERAGE_LEGEND=$(grep -oP 'coverage_legend">(\d+)/(\d+)' "$PIT_REPORT" | tail -n 1)
-              COVERED_LINES_MODULE=$(echo $COVERAGE_LEGEND | awk -F'[/>]' '{print $2}')
-              TOTAL_LINES_MODULE=$(echo $COVERAGE_LEGEND | awk -F'[/>]' '{print $3}')
+              LINE_COVERAGE=$(grep -oP 'Line Coverage.*?(\d+)%' "$PIT_REPORT" | head -n 1 | awk '{print $NF}' | sed 's/%//')
+              COVERAGE_LEGEND=$(grep -oP 'coverage_legend">(\d+)/(\d+)' "$PIT_REPORT" | head -n 1)
+              COVERED_LINES_MODULE=$(echo $COVERAGE_LEGEND | awk -F'[">]' '{print $2}')
+              TOTAL_LINES_MODULE=$(echo $COVERAGE_LEGEND | awk -F'[/>]' '{print $2}')
           
               if [ -n "$LINE_COVERAGE" ] && [ -n "$TOTAL_LINES_MODULE" ] && [ -n "$COVERED_LINES_MODULE" ]; then
                 TOTAL_LINES=$((TOTAL_LINES + TOTAL_LINES_MODULE))
