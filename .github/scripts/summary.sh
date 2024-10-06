@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x  # Habilita el modo de depuración
-
 TOTAL_LINES=0
 COVERED_LINES=0
 
