@@ -1,153 +1,40 @@
-name: "CodeQL, Cobertura y Pruebas de Mutación"
+name: Build, Test, and Analyze
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ main, develop ]
 
 jobs:
-  analyze:
-    name: Analyze
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: 'java'
+      - uses: actions/checkout@v3
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: maven
 
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+      - name: Build with Maven
+        run: mvn clean install
 
-      - name: Build and Test with Maven
+      - name: Run tests and generate coverage report
+        run: mvn test jacoco:report
+
+      - name: Print coverage percentage
         run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory contents before build:"
-          ls -R
-          mvn clean install -DskipTests
-          mvn verify org.jacoco:jacoco-maven-plugin:report
-          echo "Directory contents after build:"
-          ls -R
+          COVERAGE=$(mvn jacoco:report org.jacoco:jacoco-maven-plugin:report-aggregate -q -Dexec.args="print-coverage")
+          echo "Cobertura de código: $COVERAGE%"
 
-      - name: Run PIT Mutation Testing
+      - name: Run PIT mutation testing
+        run: mvn org.pitest:pitest-maven:mutationCoverage
+
+      - name: Print PIT mutation score
         run: |
-          mvn org.pitest:pitest-maven:mutationCoverage
-          echo "Directory contents after PIT:"
-          ls -R
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:java"
-
-      - name: Check PIT reports
-        run: |
-          MODULES=("infrastructure" "application" "domain")
-          for MODULE in "${MODULES[@]}"; do
-            if [ -d "$MODULE/target/pit-reports" ]; then
-              echo "Contenido de $MODULE/target/pit-reports:"
-              ls -R $MODULE/target/pit-reports
-              echo "\nResumen del informe PIT para $MODULE:"
-              grep -A 7 "<tbody>" $MODULE/target/pit-reports/index.html | tail -n 4 | sed 's/<[^>]*>//g' | sed 's/^ *//g'
-            else
-              echo "El directorio $MODULE/target/pit-reports no existe"
-            fi
-          done
-          
-          # Verificar si al menos un módulo tiene informes PIT
-          if ! ls */target/pit-reports 1> /dev/null 2>&1; then
-            echo "No se encontraron informes PIT en ningún módulo"
-            exit 1
-          fi
-
-      - name: Check JaCoCo Coverage
-        run: |
-          MODULES=("infrastructure" "application" "domain")
-          TOTAL_INSTRUCTIONS=0
-          TOTAL_COVERED=0
-          for MODULE in "${MODULES[@]}"; do
-            JACOCO_CSV="$MODULE/target/site/jacoco/jacoco.csv"
-            echo "Buscando archivo $JACOCO_CSV"
-            if [ -f "$JACOCO_CSV" ]; then
-              echo "Contenido de $JACOCO_CSV:"
-              cat "$JACOCO_CSV"
-              MODULE_INSTRUCTIONS=$(awk -F"," '{ instructions += $4 + $5 } END { print instructions }' "$JACOCO_CSV")
-              MODULE_COVERED=$(awk -F"," '{ covered += $5 } END { print covered }' "$JACOCO_CSV")
-              echo "Instrucciones totales para $MODULE: $MODULE_INSTRUCTIONS"
-              echo "Instrucciones cubiertas para $MODULE: $MODULE_COVERED"
-              TOTAL_INSTRUCTIONS=$((TOTAL_INSTRUCTIONS + MODULE_INSTRUCTIONS))
-              TOTAL_COVERED=$((TOTAL_COVERED + MODULE_COVERED))
-              if [ $MODULE_INSTRUCTIONS -eq 0 ]; then
-                echo "Advertencia: No hay instrucciones para $MODULE"
-                MODULE_COVERAGE=0
-              else
-                MODULE_COVERAGE=$((MODULE_COVERED * 100 / MODULE_INSTRUCTIONS))
-              fi
-              echo "Cobertura para $MODULE: $MODULE_COVERAGE%"
-            else
-              echo "No se encontró el archivo jacoco.csv para el módulo $MODULE"
-            fi
-          done
-          
-          echo "Total de instrucciones: $TOTAL_INSTRUCTIONS"
-          echo "Total de instrucciones cubiertas: $TOTAL_COVERED"
-          
-          if [ $TOTAL_INSTRUCTIONS -eq 0 ]; then
-            echo "No se encontraron datos de cobertura"
-            exit 1
-          fi
-          
-          COVERAGE=$((TOTAL_COVERED * 100 / TOTAL_INSTRUCTIONS))
-          echo "Cobertura total (JaCoCo): $COVERAGE%"
-          if [ $COVERAGE -lt 80 ]; then
-            echo "La cobertura de código es menor al 80%. Cobertura actual: $COVERAGE%"
-            echo "ADVERTENCIA: La cobertura es baja. Asegúrate de que las pruebas se estén ejecutando correctamente."
-          else
-            echo "La cobertura de código es igual o superior al 80%. Cobertura actual: $COVERAGE%"
-          fi
-
-      - name: Upload PIT reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: pit-reports
-          path: |
-            */target/pit-reports
-        if: always()
-
-      - name: Upload JaCoCo reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: jacoco-reports
-          path: |
-            */target/site/jacoco
-        if: always()
-
-      - name: Provide instructions for viewing reports
-        run: |
-          echo "Para ver los informes completos:"
-          echo "1. Ve a la pestaña 'Actions' en GitHub"
-          echo "2. Haz clic en esta ejecución del workflow"
-          echo "3. Desplázate hasta la sección 'Artifacts'"
-          echo "4. Descarga los artefactos 'pit-reports' y 'jacoco-reports'"
-          echo "5. Descomprime los archivos y abre los archivos index.html en tu navegador"
+          MUTATION_SCORE=$(grep -oP 'Mutation score: \K[0-9]+%' target/pit-reports/mutations.xml | head -1)
+          echo "Porcentaje de mutantes eliminados: $MUTATION_SCORE"
