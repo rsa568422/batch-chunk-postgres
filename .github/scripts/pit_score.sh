@@ -8,26 +8,16 @@ for MODULE in domain infrastructure application; do
     echo "Informe encontrado: $PIT_REPORT"
 
     if [ -f "$PIT_REPORT" ]; then
-        echo "Contenido del archivo $PIT_REPORT:"
-        cat "$PIT_REPORT"
-
         echo "Buscando 'Mutation Coverage':"
         grep "Mutation Coverage" "$PIT_REPORT"
 
         echo "Intentando extraer el porcentaje de Mutation Coverage:"
-        MUTATION_COVERAGE_LINE=$(grep -n "Mutation Coverage" "$PIT_REPORT" | cut -d ':' -f 1)
-        echo "Línea de Mutation Coverage: $MUTATION_COVERAGE_LINE"
+        MUTATION_SCORE=$(grep -A1 "<th>Mutation Coverage</th>" "$PIT_REPORT" |
+                         grep -oP '(\d+)%.*?(\d+)/(\d+)' |
+                         head -n1 |
+                         awk -F'[%/]' '{print $1}')
 
-        if [ -n "$MUTATION_COVERAGE_LINE" ]; then
-            NEXT_LINE=$((MUTATION_COVERAGE_LINE + 1))
-            PERCENTAGE_LINE=$(sed "${NEXT_LINE}q;d" "$PIT_REPORT")
-            echo "Línea con el porcentaje: $PERCENTAGE_LINE"
-
-            MUTATION_SCORE=$(echo "$PERCENTAGE_LINE" | grep -oP '\d+(?=%)')
-            echo "MUTATION_SCORE extraído: $MUTATION_SCORE"
-        else
-            echo "No se encontró la línea 'Mutation Coverage'"
-        fi
+        echo "MUTATION_SCORE extraído: $MUTATION_SCORE"
 
         if [ -n "$MUTATION_SCORE" ]; then
             echo "$MODULE - Porcentaje de mutantes eliminados: $MUTATION_SCORE%"
