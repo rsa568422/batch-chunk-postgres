@@ -33,15 +33,29 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
                 <configuration>
                     <targetClasses>
-                        <param>com.example.domain.*</param>
+                        <param>com.example.batch.domain.*</param>
                     </targetClasses>
                     <targetTests>
-                        <param>com.example.domain.*Test</param>
+                        <param>com.example.batch.domain.*Test</param>
                     </targetTests>
+                    <outputFormats>
+                        <outputFormat>XML</outputFormat>
+                        <outputFormat>HTML</outputFormat>
+                    </outputFormats>
+                    <verbose>true</verbose>
+                    <timestampedReports>false</timestampedReports>
                 </configuration>
             </plugin>
         </plugins>
