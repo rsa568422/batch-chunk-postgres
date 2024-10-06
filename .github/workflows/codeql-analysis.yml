@@ -26,10 +26,14 @@ jobs:
       - name: Run tests and generate coverage report
         run: mvn test jacoco:report
 
-      - name: Print coverage percentage
+      - name: Check coverage and print percentage
         run: |
           COVERAGE=$(mvn jacoco:report org.jacoco:jacoco-maven-plugin:report-aggregate -q -Dexec.args="print-coverage")
           echo "Cobertura de código: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "La cobertura de código es menor al 80%. El flujo de trabajo fallará."
+            exit 1
+          fi
 
       - name: Run PIT mutation testing
         run: mvn org.pitest:pitest-maven:mutationCoverage
