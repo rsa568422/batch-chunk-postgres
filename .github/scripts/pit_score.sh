@@ -12,10 +12,10 @@ for MODULE in domain infrastructure application; do
         grep "Mutation Coverage" "$PIT_REPORT"
 
         echo "Intentando extraer el porcentaje de Mutation Coverage:"
-        MUTATION_SCORE=$(grep -A1 "<th>Mutation Coverage</th>" "$PIT_REPORT" |
-                         grep -oP '(\d+)%.*?(\d+)/(\d+)' |
-                         head -n1 |
-                         awk -F'[%/]' '{print $1}')
+        MUTATION_SCORE=$(sed -n '/<h3>Project Summary<\/h3>/,/<\/tbody>/p' "$PIT_REPORT" |
+                         grep -oP '<td>(\d+)%.*?Mutation Coverage' |
+                         grep -oP '\d+' |
+                         head -n1)
 
         echo "MUTATION_SCORE extraído: $MUTATION_SCORE"
 
