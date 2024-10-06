@@ -8,7 +8,7 @@ for MODULE in domain infrastructure application; do
     echo "Informe encontrado: $PIT_REPORT"
 
     if [ -f "$PIT_REPORT" ]; then
-        MUTATION_SCORE=$(grep -oP '<td>(\d+)%.*?Mutation Coverage' "$PIT_REPORT" | grep -oP '\d+')
+        MUTATION_SCORE=$(grep -oP 'Mutation Coverage.*?(\d+)%' "$PIT_REPORT" | grep -oP '\d+' | head -n 1)
         echo "MUTATION_SCORE extraído: $MUTATION_SCORE"
 
         if [ -n "$MUTATION_SCORE" ]; then
