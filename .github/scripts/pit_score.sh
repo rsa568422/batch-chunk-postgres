@@ -32,6 +32,12 @@ done
 if [ $TOTAL_MUTATIONS -gt 0 ]; then
     TOTAL_PERCENTAGE=$(echo "scale=2; $KILLED_MUTATIONS * 100 / $TOTAL_MUTATIONS" | bc)
     echo "Porcentaje total de mutantes eliminados: $TOTAL_PERCENTAGE%"
+
+    if (( $(echo "$TOTAL_PERCENTAGE < 50" | bc -l) )); then
+        echo "El porcentaje de mutantes eliminados es menor al 50%."
+        exit 1
+    fi
 else
     echo "No se encontraron mutaciones para calcular el porcentaje total"
+    exit 1
 fi
