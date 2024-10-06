@@ -20,15 +20,12 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Run tests and generate coverage report
-        run: mvn test jacoco:report
+      - name: Build with Maven and run tests
+        run: mvn clean verify
 
       - name: Check coverage and print percentage
         run: |
-          COVERAGE=$(mvn jacoco:report org.jacoco:jacoco-maven-plugin:report-aggregate -q -Dexec.args="print-coverage")
+          COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered / instructions * 100 }' target/site/jacoco/jacoco.csv)
           echo "Cobertura de código: $COVERAGE%"
           if (( $(echo "$COVERAGE < 80" | bc -l) )); then
             echo "La cobertura de código es menor al 80%. El flujo de trabajo fallará."
