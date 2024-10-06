@@ -24,7 +24,7 @@ for MODULE in domain infrastructure application; do
     fi
 
     # Extraer estadísticas del informe
-    LINE_COVERAGE=$(grep -oP 'Line Coverage.*?(\d+)%' "$REPORT_PATH" | head -n 1 | awk '{print $NF}' | sed 's/%//')
+    LINE_COVERAGE=$(grep -oP 'Line Coverage.*?(\d+)%' "$REPORT_PATH" | head -n 1 | grep -oP '\d+')
     echo "LINE_COVERAGE: $LINE_COVERAGE"
 
     COVERAGE_LEGEND=$(grep -oP '<div class="coverage_legend">(\d+)/(\d+)</div>' "$REPORT_PATH" | head -n 1)
@@ -36,7 +36,7 @@ for MODULE in domain infrastructure application; do
     TOTAL_LINES_MODULE=$(echo "$COVERAGE_LEGEND" | grep -oP '/(\d+)' | sed 's/\///')
     echo "TOTAL_LINES_MODULE: $TOTAL_LINES_MODULE"
 
-    if [ -n "$LINE_COVERAGE" ] && [ -n "$TOTAL_LINES_MODULE" ] && [ -n "$COVERED_LINES_MODULE" ]; then
+    if [ -n "$COVERED_LINES_MODULE" ] && [ -n "$TOTAL_LINES_MODULE" ]; then
         TOTAL_LINES=$((TOTAL_LINES + TOTAL_LINES_MODULE))
         COVERED_LINES=$((COVERED_LINES + COVERED_LINES_MODULE))
         echo "$MODULE - Líneas totales: $TOTAL_LINES_MODULE, Líneas cubiertas: $COVERED_LINES_MODULE, Cobertura: $LINE_COVERAGE%"
