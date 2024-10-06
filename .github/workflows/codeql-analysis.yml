@@ -25,10 +25,15 @@ jobs:
 
       - name: Check coverage and print percentage
         run: |
-          COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered / instructions * 100 }' target/site/jacoco/jacoco.csv)
-          echo "Cobertura de código: $COVERAGE%"
-          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-            echo "La cobertura de código es menor al 80%. El flujo de trabajo fallará."
+          if [ -f target/site/jacoco/jacoco.csv ]; then
+            COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print (instructions > 0) ? (covered / instructions * 100) : 0 }' target/site/jacoco/jacoco.csv)
+            echo "Cobertura de código: $COVERAGE%"
+            if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+              echo "La cobertura de código es menor al 80%. El flujo de trabajo fallará."
+              exit 1
+            fi
+          else
+            echo "El archivo jacoco.csv no se encontró. No se puede calcular la cobertura."
             exit 1
           fi
 
@@ -37,5 +42,9 @@ jobs:
 
       - name: Print PIT mutation score
         run: |
-          MUTATION_SCORE=$(grep -oP 'Mutation score: \K[0-9]+%' target/pit-reports/mutations.xml | head -1)
-          echo "Porcentaje de mutantes eliminados: $MUTATION_SCORE"
+          if [ -f target/pit-reports/mutations.xml ]; then
+            MUTATION_SCORE=$(grep -oP 'Mutation score: \K[0-9]+%' target/pit-reports/mutations.xml | head -1)
+            echo "Porcentaje de mutantes eliminados: $MUTATION_SCORE"
+          else
+            echo "El archivo mutations.xml no se encontró. No se puede obtener el puntaje de mutación."
+          fi
