@@ -13,8 +13,8 @@ for MODULE in domain infrastructure application; do
 
         echo "Intentando extraer el porcentaje de Mutation Coverage:"
         MUTATION_SCORE=$(sed -n '/<h3>Project Summary<\/h3>/,/<\/tbody>/p' "$PIT_REPORT" |
-                         grep -oP '(?<=<td>)\d+(?=% <div class="coverage_bar">.*?Mutation Coverage)' |
-                         tail -n1)
+                         grep -oP '<td>\K\d+(?=% <div class="coverage_bar">)' |
+                         sed -n '3p')
 
         echo "MUTATION_SCORE extraído: $MUTATION_SCORE"
 
