@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x  # Habilita el modo de depuración
+
 TOTAL_LINES=0
 COVERED_LINES=0
 
@@ -23,9 +25,16 @@ for MODULE in domain infrastructure application; do
 
     # Extraer estadísticas del informe
     LINE_COVERAGE=$(grep -oP 'Line Coverage.*?(\d+)%' "$REPORT_PATH" | head -n 1 | awk '{print $NF}' | sed 's/%//')
+    echo "LINE_COVERAGE: $LINE_COVERAGE"
+
     COVERAGE_LEGEND=$(grep -oP '<div class="coverage_legend">(\d+)/(\d+)</div>' "$REPORT_PATH" | head -n 1)
+    echo "COVERAGE_LEGEND: $COVERAGE_LEGEND"
+
     COVERED_LINES_MODULE=$(echo "$COVERAGE_LEGEND" | grep -oP '(\d+)/' | sed 's/\///')
+    echo "COVERED_LINES_MODULE: $COVERED_LINES_MODULE"
+
     TOTAL_LINES_MODULE=$(echo "$COVERAGE_LEGEND" | grep -oP '/(\d+)' | sed 's/\///')
+    echo "TOTAL_LINES_MODULE: $TOTAL_LINES_MODULE"
 
     if [ -n "$LINE_COVERAGE" ] && [ -n "$TOTAL_LINES_MODULE" ] && [ -n "$COVERED_LINES_MODULE" ]; then
         TOTAL_LINES=$((TOTAL_LINES + TOTAL_LINES_MODULE))
@@ -37,6 +46,9 @@ for MODULE in domain infrastructure application; do
         sed -n '/<h3>Project Summary<\/h3>/,/<\/tbody>/p' "$REPORT_PATH"
     fi
 done
+
+echo "TOTAL_LINES: $TOTAL_LINES"
+echo "COVERED_LINES: $COVERED_LINES"
 
 if [ $TOTAL_LINES -gt 0 ]; then
     COVERAGE=$(echo "scale=2; $COVERED_LINES * 100 / $TOTAL_LINES" | bc)
