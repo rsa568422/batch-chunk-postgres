@@ -23,7 +23,7 @@ for MODULE in domain infrastructure application; do
 
     # Extraer estadísticas del informe
     LINE_COVERAGE=$(grep -oP 'Line Coverage.*?(\d+)%' "$REPORT_PATH" | head -n 1 | awk '{print $NF}' | sed 's/%//')
-    COVERAGE_LEGEND=$(grep -oP '<div class="coverage_legend">(\d+)/(\d+)</div>' "$REPORT_PATH" | head -n 1)
+    COVERAGE_LEGEND=$(grep -oP 'class="coverage_legend">(\d+)/(\d+)' "$REPORT_PATH" | head -n 1)
     COVERED_LINES_MODULE=$(echo "$COVERAGE_LEGEND" | grep -oP '(\d+)/' | sed 's/\///')
     TOTAL_LINES_MODULE=$(echo "$COVERAGE_LEGEND" | grep -oP '/(\d+)' | sed 's/\///')
 
