@@ -23,18 +23,41 @@ jobs:
       - name: Build with Maven and run tests
         run: mvn clean verify
 
+      - name: Debug - List JaCoCo reports
+        run: find . -name "jacoco*.csv" -o -name "jacoco*.xml"
+
       - name: Check coverage and print percentage
         run: |
-          if [ -f target/site/jacoco/jacoco.csv ]; then
-            COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print (instructions > 0) ? (covered / instructions * 100) : 0 }' target/site/jacoco/jacoco.csv)
+          JACOCO_CSV=$(find . -name "jacoco.csv" | head -n 1)
+          if [ -f "$JACOCO_CSV" ]; then
+            echo "Usando archivo de cobertura: $JACOCO_CSV"
+            COVERAGE=$(awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print (instructions > 0) ? (covered / instructions * 100) : 0 }' "$JACOCO_CSV")
             echo "Cobertura de código: $COVERAGE%"
             if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-              echo "La cobertura de código es menor al 80%. El flujo de trabajo fallará."
+              echo "La cobertura de código es menor al 80%."
+              echo "Por favor, revisa tus pruebas y asegúrate de que cubran al menos el 80% del código."
+              echo "Cobertura actual: $COVERAGE%"
+              echo "Cobertura requerida: 80%"
               exit 1
             fi
           else
-            echo "El archivo jacoco.csv no se encontró. No se puede calcular la cobertura."
-            exit 1
+            echo "No se encontró el archivo jacoco.csv. Verificando jacoco.xml..."
+            JACOCO_XML=$(find . -name "jacoco.xml" | head -n 1)
+            if [ -f "$JACOCO_XML" ]; then
+              echo "Usando archivo de cobertura: $JACOCO_XML"
+              COVERAGE=$(xmllint --xpath "string(//report/counter[@type='INSTRUCTION']/@covered) div string(//report/counter[@type='INSTRUCTION']/@covered + //report/counter[@type='INSTRUCTION']/@missed) * 100" "$JACOCO_XML")
+              echo "Cobertura de código: $COVERAGE%"
+              if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+                echo "La cobertura de código es menor al 80%."
+                echo "Por favor, revisa tus pruebas y asegúrate de que cubran al menos el 80% del código."
+                echo "Cobertura actual: $COVERAGE%"
+                echo "Cobertura requerida: 80%"
+                exit 1
+              fi
+            else
+              echo "No se encontraron archivos de informe de JaCoCo. Verifica la configuración de JaCoCo en tu pom.xml"
+              exit 1
+            fi
           fi
 
       - name: Run PIT mutation testing
@@ -42,9 +65,10 @@ jobs:
 
       - name: Print PIT mutation score
         run: |
-          if [ -f target/pit-reports/mutations.xml ]; then
-            MUTATION_SCORE=$(grep -oP 'Mutation score: \K[0-9]+%' target/pit-reports/mutations.xml | head -1)
+          MUTATIONS_XML=$(find . -name "mutations.xml" | head -n 1)
+          if [ -f "$MUTATIONS_XML" ]; then
+            MUTATION_SCORE=$(grep -oP 'Mutation score: \K[0-9]+%' "$MUTATIONS_XML" | head -1)
             echo "Porcentaje de mutantes eliminados: $MUTATION_SCORE"
           else
-            echo "El archivo mutations.xml no se encontró. No se puede obtener el puntaje de mutación."
+            echo "El archivo mutations.xml no se encontró. Verifica la configuración de PIT en tu pom.xml"
           fi
