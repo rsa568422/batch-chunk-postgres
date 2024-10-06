@@ -27,6 +27,7 @@ jobs:
         run: |
           chmod +x .github/scripts/summary.sh
           bash .github/scripts/summary.sh
+        shell: bash
 
       - name: Print PIT mutation scores
         run: |
