@@ -1,0 +1,43 @@
+name: Build, Test, and Analyze
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven and run tests
+        run: mvn clean verify org.pitest:pitest-maven:mutationCoverage
+
+      - name: Check coverage and print percentage
+        run: |
+          chmod +x .github/scripts/summary.sh
+          bash -x .github/scripts/summary.sh
+        shell: bash
+
+      - name: Print PIT mutation scores
+        run: |
+          for MODULE in domain infrastructure application; do
+            PIT_REPORT=$(find ./$MODULE/target/pit-reports -name "index.html" | sort -r | head -n 1)
+            if [ -f "$PIT_REPORT" ]; then
+              MUTATION_SCORE=$(grep -oP 'Mutation Coverage.*?(\d+(?:\.\d+)?)%' "$PIT_REPORT" | awk '{print $NF}' | sed 's/%//')
+              echo "$MODULE - Porcentaje de mutantes eliminados: $MUTATION_SCORE%"
+            else
+              echo "No se encontró el informe de PIT para $MODULE"
+              ls -R ./$MODULE/target/pit-reports
+            fi
+          done
