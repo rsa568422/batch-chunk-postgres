@@ -31,13 +31,6 @@ jobs:
 
       - name: Print PIT mutation scores
         run: |
-          for MODULE in domain infrastructure application; do
-            PIT_REPORT=$(find ./$MODULE/target/pit-reports -name "index.html" | sort -r | head -n 1)
-            if [ -f "$PIT_REPORT" ]; then
-              MUTATION_SCORE=$(grep -oP 'Mutation Coverage.*?(\d+(?:\.\d+)?)%' "$PIT_REPORT" | awk '{print $NF}' | sed 's/%//')
-              echo "$MODULE - Porcentaje de mutantes eliminados: $MUTATION_SCORE%"
-            else
-              echo "No se encontró el informe de PIT para $MODULE"
-              ls -R ./$MODULE/target/pit-reports
-            fi
-          done
+          chmod +x .github/scripts/pit_score.sh
+          bash .github/scripts/pit_score.sh
+        shell: bash
