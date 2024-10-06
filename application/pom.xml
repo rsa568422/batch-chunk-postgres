@@ -35,17 +35,14 @@
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
-            <version>${mapstruct.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok-mapstruct-binding</artifactId>
-            <version>${lombok-mapstruct-binding.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -68,8 +65,8 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
             </plugin>
         </plugins>
     </build>
