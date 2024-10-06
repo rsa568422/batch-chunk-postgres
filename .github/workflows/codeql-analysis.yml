@@ -34,9 +34,9 @@ jobs:
           
               # Extrae la información de cobertura de líneas
               LINE_COVERAGE=$(grep -oP 'Line Coverage.*?(\d+)%' "$PIT_REPORT" | head -n 1 | awk '{print $NF}' | sed 's/%//')
-              COVERAGE_LEGEND=$(grep -oP 'coverage_legend">(\d+)/(\d+)' "$PIT_REPORT" | head -n 1)
-              COVERED_LINES_MODULE=$(echo $COVERAGE_LEGEND | awk -F'[">]' '{print $2}')
-              TOTAL_LINES_MODULE=$(echo $COVERAGE_LEGEND | awk -F'[/>]' '{print $2}')
+              COVERAGE_LEGEND=$(grep -oP 'Line Coverage.*?<div class="coverage_legend">(\d+)/(\d+)' "$PIT_REPORT" | head -n 1)
+              COVERED_LINES_MODULE=$(echo $COVERAGE_LEGEND | grep -oP '(\d+)/\d+' | cut -d'/' -f1)
+              TOTAL_LINES_MODULE=$(echo $COVERAGE_LEGEND | grep -oP '\d+/(\d+)' | cut -d'/' -f2)
           
               if [ -n "$LINE_COVERAGE" ] && [ -n "$TOTAL_LINES_MODULE" ] && [ -n "$COVERED_LINES_MODULE" ]; then
                 TOTAL_LINES=$((TOTAL_LINES + TOTAL_LINES_MODULE))
