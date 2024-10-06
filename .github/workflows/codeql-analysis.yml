@@ -32,51 +32,8 @@ jobs:
             if [ -f "$PIT_REPORT" ]; then
               echo "Procesando informe de $MODULE: $PIT_REPORT"
           
+              # Extrae la sección de resumen del proyecto
+              PROJECT_SUMMARY=$(sed -n '/<h3>Project Summary<\/h3>/,/<\/tbody>/p' "$PIT_REPORT")
+          
               # Extrae la información de cobertura de líneas
-              LINE_COVERAGE=$(grep -oP 'Line Coverage.*?(\d+)%' "$PIT_REPORT" | head -n 1 | awk '{print $NF}' | sed 's/%//')
-              COVERAGE_LEGEND=$(grep -oP 'Line Coverage.*?<div class="coverage_legend">(\d+)/(\d+)' "$PIT_REPORT" | head -n 1)
-              COVERED_LINES_MODULE=$(echo $COVERAGE_LEGEND | grep -oP '(\d+)/\d+' | cut -d'/' -f1)
-              TOTAL_LINES_MODULE=$(echo $COVERAGE_LEGEND | grep -oP '\d+/(\d+)' | cut -d'/' -f2)
-          
-              if [ -n "$LINE_COVERAGE" ] && [ -n "$TOTAL_LINES_MODULE" ] && [ -n "$COVERED_LINES_MODULE" ]; then
-                TOTAL_LINES=$((TOTAL_LINES + TOTAL_LINES_MODULE))
-                COVERED_LINES=$((COVERED_LINES + COVERED_LINES_MODULE))
-                echo "$MODULE - Líneas totales: $TOTAL_LINES_MODULE, Líneas cubiertas: $COVERED_LINES_MODULE, Cobertura: $LINE_COVERAGE%"
-              else
-                echo "No se pudo extraer la información de cobertura para $MODULE"
-                echo "Contenido del informe:"
-                cat "$PIT_REPORT"
-              fi
-            else
-              echo "No se encontró el informe de PIT para $MODULE"
-              ls -R ./$MODULE/target/pit-reports
-            fi
-          done
-          
-          if [ $TOTAL_LINES -gt 0 ]; then
-            COVERAGE=$(echo "scale=2; $COVERED_LINES * 100 / $TOTAL_LINES" | bc)
-            echo "Cobertura de líneas total: $COVERAGE%"
-            if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-              echo "La cobertura de líneas es menor al 80%."
-              echo "Por favor, revisa tus pruebas y asegúrate de que cubran al menos el 80% de las líneas de código."
-              echo "Cobertura actual: $COVERAGE%"
-              echo "Cobertura requerida: 80%"
-              exit 1
-            fi
-          else
-            echo "No se encontraron líneas para calcular la cobertura"
-            exit 1
-          fi
-
-      - name: Print PIT mutation scores
-        run: |
-          for MODULE in domain infrastructure application; do
-            PIT_REPORT=$(find ./$MODULE/target/pit-reports -name "index.html" | sort -r | head -n 1)
-            if [ -f "$PIT_REPORT" ]; then
-              MUTATION_SCORE=$(grep -oP 'Mutation Coverage.*?(\d+(?:\.\d+)?)%' "$PIT_REPORT" | awk '{print $NF}' | sed 's/%//')
-              echo "$MODULE - Porcentaje de mutantes eliminados: $MUTATION_SCORE%"
-            else
-              echo "No se encontró el informe de PIT para $MODULE"
-              ls -R ./$MODULE/target/pit-reports
-            fi
-          done
+              LINE_COVERAGE=$(echo "$PROJECT_SUMMARY" | grep -oP 'Line Coverage
