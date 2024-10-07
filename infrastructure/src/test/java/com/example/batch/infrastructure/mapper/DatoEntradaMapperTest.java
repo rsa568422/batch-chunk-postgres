@@ -2,10 +2,13 @@ package com.example.batch.infrastructure.mapper;
 
 import com.example.batch.infrastructure.Data;
 import com.example.batch.infrastructure.configuration.MapperTestConfig;
+import com.example.batch.infrastructure.entity.DatoEntradaEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,6 +32,27 @@ class DatoEntradaMapperTest {
         assertAll(
                 () -> assertNotNull(actual),
                 () -> assertEquals(Data.ENTRADA_1.getId(), actual.getId()),
+                () -> assertEquals(Data.ENTRADA_1.getPrice(), actual.getPrice()),
+                () -> assertEquals(Data.ENTRADA_1.getAmount(), actual.getAmount())
+        );
+    }
+
+    @Test
+    void toModelNullId() {
+        // given
+        var entrada = new DatoEntradaEntity(
+                null,
+                BigDecimal.valueOf(3),
+                BigDecimal.valueOf(120)
+        );
+
+        // when
+        var actual = mapper.toModel(entrada);
+
+        // then
+        assertAll(
+                () -> assertNotNull(actual),
+                () -> assertNull(actual.getId()),
                 () -> assertEquals(Data.ENTRADA_1.getPrice(), actual.getPrice()),
                 () -> assertEquals(Data.ENTRADA_1.getAmount(), actual.getAmount())
         );

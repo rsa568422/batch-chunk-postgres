@@ -1,11 +1,14 @@
 package com.example.batch.infrastructure.mapper;
 
+import com.example.batch.domain.model.DatoSalida;
 import com.example.batch.infrastructure.Data;
 import com.example.batch.infrastructure.configuration.MapperTestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,6 +32,24 @@ class DatoSalidaMapperTest {
         assertAll(
                 () -> assertNotNull(actual),
                 () -> assertEquals(Data.SALIDA_ENTITY_1.getUuid(), actual.getUuid()),
+                () -> assertEquals(Data.SALIDA_ENTITY_1.getTotal(), actual.getTotal())
+        );
+    }
+
+    @Test
+    void toEntityNullUUID() {
+        // given
+        var salida = DatoSalida.builder()
+                .total(BigDecimal.valueOf(360))
+                .build();
+
+        // when
+        var actual = mapper.toEntity(salida);
+
+        // then
+        assertAll(
+                () -> assertNotNull(actual),
+                () -> assertNull(actual.getUuid()),
                 () -> assertEquals(Data.SALIDA_ENTITY_1.getTotal(), actual.getTotal())
         );
     }
