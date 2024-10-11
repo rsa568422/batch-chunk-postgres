@@ -1,4 +1,4 @@
-package com.example.batch.infrastructure.entity;
+package com.example.batch.infrastructure.entity.salida;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

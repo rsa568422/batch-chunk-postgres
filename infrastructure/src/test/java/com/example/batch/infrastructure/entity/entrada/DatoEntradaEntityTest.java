@@ -1,4 +1,4 @@
-package com.example.batch.infrastructure.entity;
+package com.example.batch.infrastructure.entity.entrada;
 
 import org.junit.jupiter.api.Test;
 

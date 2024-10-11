@@ -2,7 +2,7 @@ package com.example.batch.infrastructure.adapter;
 
 import com.example.batch.infrastructure.Data;
 import com.example.batch.infrastructure.mapper.DatoSalidaMapper;
-import com.example.batch.infrastructure.repository.DatoSalidaJpaRepository;
+import com.example.batch.infrastructure.repository.salida.DatoSalidaJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

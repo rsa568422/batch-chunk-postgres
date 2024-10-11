@@ -1,7 +1,7 @@
 package com.example.batch.infrastructure.mapper;
 
 import com.example.batch.domain.model.DatoSalida;
-import com.example.batch.infrastructure.entity.DatoSalidaEntity;
+import com.example.batch.infrastructure.entity.salida.DatoSalidaEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

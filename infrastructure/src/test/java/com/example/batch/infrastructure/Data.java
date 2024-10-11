@@ -2,8 +2,8 @@ package com.example.batch.infrastructure;
 
 import com.example.batch.domain.model.DatoEntrada;
 import com.example.batch.domain.model.DatoSalida;
-import com.example.batch.infrastructure.entity.DatoEntradaEntity;
-import com.example.batch.infrastructure.entity.DatoSalidaEntity;
+import com.example.batch.infrastructure.entity.entrada.DatoEntradaEntity;
+import com.example.batch.infrastructure.entity.salida.DatoSalidaEntity;
 
 import java.math.BigDecimal;
 import java.util.List;

@@ -1,6 +1,6 @@
-package com.example.batch.infrastructure.repository;
+package com.example.batch.infrastructure.repository.entrada;
 
-import com.example.batch.infrastructure.entity.DatoEntradaEntity;
+import com.example.batch.infrastructure.entity.entrada.DatoEntradaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
