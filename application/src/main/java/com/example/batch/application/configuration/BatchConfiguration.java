@@ -18,14 +18,19 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import static com.example.batch.application.configuration.Constants.BASE_PACKAGE;
+import static com.example.batch.application.configuration.Constants.BATCH_JOB;
+import static com.example.batch.application.configuration.Constants.BATCH_STEP;
+import static com.example.batch.application.configuration.Constants.BATCH_TRANSACTION_MANAGER;
+
 @Configuration
 @RequiredArgsConstructor
-@ComponentScan("com.example.batch")
+@ComponentScan(BASE_PACKAGE)
 public class BatchConfiguration {
 
     @Bean
     public Job job(JobRepository jobRepository, Step step) {
-        return new JobBuilder("batchJob", jobRepository)
+        return new JobBuilder(BATCH_JOB, jobRepository)
                 .start(step)
                 .incrementer(new RunIdIncrementer())
                 .build();
@@ -33,11 +38,11 @@ public class BatchConfiguration {
 
     @Bean
     public Step step(JobRepository jobRepository,
-                     @Qualifier("batchTransactionManager") PlatformTransactionManager transactionManager,
+                     @Qualifier(BATCH_TRANSACTION_MANAGER) PlatformTransactionManager transactionManager,
                      ItemReader<DatoEntrada> reader,
                      ItemProcessor<DatoEntrada, DatoSalida> processor,
                      ItemWriter<DatoSalida> writer) {
-        return new StepBuilder("batchStep", jobRepository)
+        return new StepBuilder(BATCH_STEP, jobRepository)
                 .<DatoEntrada, DatoSalida>chunk(10, transactionManager)
                 .reader(reader)
                 .processor(processor)

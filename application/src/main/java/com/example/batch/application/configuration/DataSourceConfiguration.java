@@ -11,25 +11,29 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
+import static com.example.batch.application.configuration.Constants.ENTRADA_DATASOURCE;
+import static com.example.batch.application.configuration.Constants.SALIDA_DATASOURCE;
+import static com.example.batch.application.configuration.Constants.SPRING_DATASOURCE;
+
 @Configuration
 public class DataSourceConfiguration {
 
     @Primary
     @Bean
     @BatchDataSource
-    @ConfigurationProperties(prefix = "spring.datasource")
+    @ConfigurationProperties(prefix = SPRING_DATASOURCE)
     public DataSource batchDataSource() {
         return DataSourceBuilder.create().build();
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "entrada.datasource")
+    @ConfigurationProperties(prefix = ENTRADA_DATASOURCE)
     public DataSource entradaDataSource() {
         return DataSourceBuilder.create().build();
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "salida.datasource")
+    @ConfigurationProperties(prefix = SALIDA_DATASOURCE)
     public DataSource salidaDataSource() {
         return DataSourceBuilder.create().build();
     }

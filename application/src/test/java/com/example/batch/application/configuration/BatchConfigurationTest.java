@@ -9,6 +9,8 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import static com.example.batch.application.configuration.Constants.BATCH_JOB;
+import static com.example.batch.application.configuration.Constants.BATCH_STEP;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,7 +29,7 @@ class BatchConfigurationTest {
         // then
         assertAll(
                 () -> assertNotNull(actual),
-                () -> assertEquals("batchJob", actual.getName())
+                () -> assertEquals(BATCH_JOB, actual.getName())
         );
     }
 
@@ -47,7 +49,7 @@ class BatchConfigurationTest {
         // then
         assertAll(
                 () -> assertNotNull(actual),
-                () -> assertEquals("batchStep", actual.getName())
+                () -> assertEquals(BATCH_STEP, actual.getName())
         );
     }
 }
