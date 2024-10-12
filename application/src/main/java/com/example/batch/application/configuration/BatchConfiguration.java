@@ -58,9 +58,9 @@ public class BatchConfiguration {
 
     @Bean
     public Step batchStep(@Qualifier(BATCH_TRANSACTION_MANAGER) PlatformTransactionManager transactionManager,
-                               ItemReader<DatoEntrada> reader,
-                               ItemProcessor<DatoEntrada, DatoSalida> processor,
-                               ItemWriter<DatoSalida> writer) {
+                          ItemReader<DatoEntrada> reader,
+                          ItemProcessor<DatoEntrada, DatoSalida> processor,
+                          ItemWriter<DatoSalida> writer) {
         return new StepBuilder(BATCH_STEP, jobRepository)
                 .<DatoEntrada, DatoSalida>chunk(10, transactionManager)
                 .reader(reader)
