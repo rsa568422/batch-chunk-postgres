@@ -11,6 +11,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import jakarta.persistence.EntityManagerFactory;
+import java.util.Map;
 
 import static com.example.batch.application.configuration.Constants.ENTRADA;
 import static com.example.batch.application.configuration.Constants.ENTRADA_DATA_SOURCE;
@@ -18,6 +19,10 @@ import static com.example.batch.application.configuration.Constants.ENTRADA_ENTI
 import static com.example.batch.application.configuration.Constants.ENTRADA_ENTITY_PACKAGE;
 import static com.example.batch.application.configuration.Constants.ENTRADA_REPOSITORY_PACKAGE;
 import static com.example.batch.application.configuration.Constants.ENTRADA_TRANSACTION_MANAGER;
+import static com.example.batch.application.configuration.Constants.HIBERNATE_DIALECT;
+import static com.example.batch.application.configuration.Constants.HIBERNATE_HBM_2_DDL_AUTO;
+import static com.example.batch.application.configuration.Constants.POSTGRES_SQL_DIALECT;
+import static com.example.batch.application.configuration.Constants.UPDATE;
 
 @Configuration
 @EnableJpaRepositories(
@@ -30,12 +35,17 @@ public class EntradaJpaConfiguration {
     @Bean
     public LocalContainerEntityManagerFactoryBean entradaEntityManagerFactory(
             EntityManagerFactoryBuilder builder, @Qualifier(ENTRADA_DATA_SOURCE) DataSource dataSource) {
-        return builder.dataSource(dataSource).packages(ENTRADA_ENTITY_PACKAGE).persistenceUnit(ENTRADA).build();
+        return builder
+                .dataSource(dataSource)
+                .packages(ENTRADA_ENTITY_PACKAGE)
+                .persistenceUnit(ENTRADA)
+                .properties(Map.of(HIBERNATE_HBM_2_DDL_AUTO, UPDATE, HIBERNATE_DIALECT, POSTGRES_SQL_DIALECT))
+                .build();
     }
 
     @Bean
-    public PlatformTransactionManager entradaTransactionManager(@Qualifier(ENTRADA_ENTITY_MANAGER_FACTORY)
-                                                                    EntityManagerFactory entityManagerFactory) {
+    public PlatformTransactionManager entradaTransactionManager(
+            @Qualifier(ENTRADA_ENTITY_MANAGER_FACTORY) EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 }
