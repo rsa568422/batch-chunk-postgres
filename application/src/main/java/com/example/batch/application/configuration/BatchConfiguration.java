@@ -12,18 +12,15 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @RequiredArgsConstructor
 @ComponentScan("com.example.batch")
-@EntityScan("com.example.batch.infrastructure.entity")
-@EnableJpaRepositories(basePackages = "com.example.batch.infrastructure.repository")
 public class BatchConfiguration {
 
     @Bean
@@ -36,7 +33,7 @@ public class BatchConfiguration {
 
     @Bean
     public Step step(JobRepository jobRepository,
-                     PlatformTransactionManager transactionManager,
+                     @Qualifier("batchTransactionManager") PlatformTransactionManager transactionManager,
                      ItemReader<DatoEntrada> reader,
                      ItemProcessor<DatoEntrada, DatoSalida> processor,
                      ItemWriter<DatoSalida> writer) {
