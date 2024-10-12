@@ -9,7 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -26,6 +29,26 @@ class DatoSalidaAdapterTest {
 
     @Mock
     private DatoSalidaMapper mapper;
+
+    @Test
+    void findAll() {
+        // given
+        when(jpaRepository.findAll()).thenReturn(Data.DATO_SALIDA_ENTITIES);
+        when(mapper.toModels(Data.DATO_SALIDA_ENTITIES)).thenReturn(Data.DATOS_SALIDA);
+
+        // when
+        var actual = adapter.findAll();
+
+        // then
+        assertAll(
+                () -> assertNotNull(actual),
+                () -> assertIterableEquals(Data.DATOS_SALIDA, actual)
+        );
+
+        verify(jpaRepository, times(1)).findAll();
+        verify(mapper, times(1)).toModels(Data.DATO_SALIDA_ENTITIES);
+        verifyNoMoreInteractions(jpaRepository, mapper);
+    }
 
     @Test
     void saveAll() {

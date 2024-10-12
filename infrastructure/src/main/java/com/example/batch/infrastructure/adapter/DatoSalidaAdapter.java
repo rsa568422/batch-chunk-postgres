@@ -18,6 +18,11 @@ public class DatoSalidaAdapter implements DatoSalidaRepository {
     private final DatoSalidaMapper mapper;
 
     @Override
+    public List<DatoSalida> findAll() {
+        return mapper.toModels(jpaRepository.findAll());
+    }
+
+    @Override
     public void saveAll(List<DatoSalida> salidas) {
         jpaRepository.saveAll(mapper.toEntities(salidas));
     }

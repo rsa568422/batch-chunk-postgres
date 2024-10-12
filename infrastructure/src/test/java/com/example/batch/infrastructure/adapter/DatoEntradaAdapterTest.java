@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
@@ -46,6 +47,20 @@ class DatoEntradaAdapterTest {
 
         verify(jpaRepository, times(1)).findAll();
         verify(mapper, times(1)).toModels(Data.DATO_ENTRADA_ENTITIES);
+        verifyNoMoreInteractions(jpaRepository, mapper);
+    }
+
+    @Test
+    void saveAll() {
+        // given
+        when(mapper.toEntities(Data.DATOS_ENTRADA)).thenReturn(Data.DATO_ENTRADA_ENTITIES);
+
+        // when
+        assertDoesNotThrow(() -> adapter.saveAll(Data.DATOS_ENTRADA));
+
+        // then
+        verify(mapper, times(1)).toEntities(Data.DATOS_ENTRADA);
+        verify(jpaRepository, times(1)).saveAll(Data.DATO_ENTRADA_ENTITIES);
         verifyNoMoreInteractions(jpaRepository, mapper);
     }
 }

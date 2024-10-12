@@ -2,6 +2,7 @@ package com.example.batch.infrastructure.mapper;
 
 import com.example.batch.domain.model.DatoEntrada;
 import com.example.batch.infrastructure.entity.entrada.DatoEntradaEntity;
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -14,4 +15,9 @@ public interface DatoEntradaMapper {
     DatoEntrada toModel(DatoEntradaEntity entrada);
 
     List<DatoEntrada> toModels(List<DatoEntradaEntity> entradas);
+
+    @InheritInverseConfiguration
+    DatoEntradaEntity toEntity(DatoEntrada entrada);
+
+    List<DatoEntradaEntity> toEntities(List<DatoEntrada> entradas);
 }

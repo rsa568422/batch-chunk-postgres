@@ -21,4 +21,9 @@ public class DatoEntradaAdapter implements DatoEntradaRepository {
     public List<DatoEntrada> findAll() {
         return mapper.toModels(jpaRepository.findAll());
     }
+
+    @Override
+    public void saveAll(List<DatoEntrada> entradas) {
+        jpaRepository.saveAll(mapper.toEntities(entradas));
+    }
 }

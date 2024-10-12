@@ -4,6 +4,8 @@ public final class Constants {
 
     private Constants() { }
 
+    public static final String UNCHECKED = "unchecked";
+
     public static final String HIBERNATE_HBM_2_DDL_AUTO = "hibernate.hbm2ddl.auto";
 
     public static final String UPDATE = "update";
@@ -13,6 +15,10 @@ public final class Constants {
     public static final String POSTGRES_SQL_DIALECT = "org.hibernate.dialect.PostgreSQLDialect";
 
     public static final String BATCH_JOB = "batchJob";
+
+    public static final String SAMPLE_DATA_STEP = "sampleDataStep";
+
+    public static final String RESULTS_STEP = "resultsStep";
 
     public static final String BATCH_STEP = "batchStep";
 

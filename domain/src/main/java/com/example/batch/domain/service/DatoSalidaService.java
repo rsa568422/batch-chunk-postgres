@@ -7,9 +7,13 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class DatoSalidaService {
+public abstract class DatoSalidaService {
 
     private final DatoSalidaRepository repository;
+
+    public List<DatoSalida> findAll() {
+        return repository.findAll();
+    }
 
     public void saveAll(List<DatoSalida> salidas) {
         repository.saveAll(salidas);
