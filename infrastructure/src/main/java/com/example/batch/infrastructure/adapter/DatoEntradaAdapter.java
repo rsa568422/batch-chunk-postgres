@@ -3,7 +3,7 @@ package com.example.batch.infrastructure.adapter;
 import com.example.batch.domain.model.DatoEntrada;
 import com.example.batch.domain.repository.DatoEntradaRepository;
 import com.example.batch.infrastructure.mapper.DatoEntradaMapper;
-import com.example.batch.infrastructure.repository.DatoEntradaJpaRepository;
+import com.example.batch.infrastructure.repository.entrada.DatoEntradaJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -20,5 +20,10 @@ public class DatoEntradaAdapter implements DatoEntradaRepository {
     @Override
     public List<DatoEntrada> findAll() {
         return mapper.toModels(jpaRepository.findAll());
+    }
+
+    @Override
+    public void saveAll(List<DatoEntrada> entradas) {
+        jpaRepository.saveAll(mapper.toEntities(entradas));
     }
 }

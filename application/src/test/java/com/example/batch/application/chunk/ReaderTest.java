@@ -3,7 +3,10 @@ package com.example.batch.application.chunk;
 import com.example.batch.application.Data;
 import com.example.batch.application.service.DatoEntradaBatchService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
@@ -16,14 +19,21 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ReaderTest {
+
+    @InjectMocks
+    private Reader reader;
+
+    @Mock
+    private DatoEntradaBatchService service;
 
     @Test
     void read() {
         // given
-        var service = Mockito.mock(DatoEntradaBatchService.class);
         when(service.findAll()).thenReturn(Data.DATOS_ENTRADA);
-        var reader = new Reader(service);
+
+        reader.findAll();
 
         // when
         var actual = reader.read();
@@ -39,19 +49,17 @@ class ReaderTest {
     }
 
     @Test
-    void readNull() {
+    void readEmpty() {
         // given
-        var service = Mockito.mock(DatoEntradaBatchService.class);
         when(service.findAll()).thenReturn(List.of());
-        var reader = new Reader(service);
+
+        reader.findAll();
 
         // when
         var actual = reader.read();
 
         // then
-        assertAll(
-                () -> assertNull(actual)
-        );
+        assertNull(actual);
 
         verify(service, times(1)).findAll();
         verifyNoMoreInteractions(service);
