@@ -1,0 +1,36 @@
+services:
+  batch:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: batch
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    volumes:
+      - batch_data:/var/lib/batch/data
+  entrada:
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_DB: entrada
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    volumes:
+      - entrada_data:/var/lib/entrada/data
+  salida:
+    image: postgres:latest
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_DB: salida
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    volumes:
+      - salida_data:/var/lib/salida/data
+
+volumes:
+  batch_data:
+  entrada_data:
+  salida_data:
