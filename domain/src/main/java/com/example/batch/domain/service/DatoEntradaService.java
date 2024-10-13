@@ -14,4 +14,8 @@ public abstract class DatoEntradaService {
     public List<DatoEntrada> findAll() {
         return repository.findAll();
     }
+
+    public void saveAll(List<DatoEntrada> entradas) {
+        repository.saveAll(entradas);
+    }
 }

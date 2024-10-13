@@ -6,5 +6,7 @@ import java.util.List;
 
 public interface DatoSalidaRepository {
 
+    List<DatoSalida> findAll();
+
     void saveAll(List<DatoSalida> salidas);
 }
