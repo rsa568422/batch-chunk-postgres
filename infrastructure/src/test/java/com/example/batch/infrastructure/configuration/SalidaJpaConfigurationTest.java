@@ -1,4 +1,4 @@
-package com.example.batch.application.configuration;
+package com.example.batch.infrastructure.configuration;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
@@ -7,28 +7,39 @@ import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.sql.DataSource;
+
 import java.util.Map;
 
-import static com.example.batch.application.configuration.Constants.ENTRADA;
-import static com.example.batch.application.configuration.Constants.ENTRADA_ENTITY_PACKAGE;
-import static com.example.batch.application.configuration.Constants.HIBERNATE_DIALECT;
-import static com.example.batch.application.configuration.Constants.HIBERNATE_HBM_2_DDL_AUTO;
-import static com.example.batch.application.configuration.Constants.POSTGRES_SQL_DIALECT;
-import static com.example.batch.application.configuration.Constants.UPDATE;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static com.example.batch.infrastructure.configuration.Constants.HIBERNATE_DIALECT;
+import static com.example.batch.infrastructure.configuration.Constants.HIBERNATE_HBM_2_DDL_AUTO;
+import static com.example.batch.infrastructure.configuration.Constants.POSTGRES_SQL_DIALECT;
+import static com.example.batch.infrastructure.configuration.Constants.SALIDA;
+import static com.example.batch.infrastructure.configuration.Constants.SALIDA_ENTITY_PACKAGE;
+import static com.example.batch.infrastructure.configuration.Constants.UPDATE;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class EntradaJpaConfigurationTest {
+class SalidaJpaConfigurationTest {
 
-    private final EntradaJpaConfiguration entradaJpaConfiguration = new EntradaJpaConfiguration();
+    private final SalidaJpaConfiguration salidaJpaConfiguration = new SalidaJpaConfiguration();
 
     @Test
-    void entradaEntityManagerFactory() {
+    void salidaDataSource() {
+        // when
+        var actual = salidaJpaConfiguration.salidaDataSource();
+
+        // then
+        assertAll(
+                () -> assertNotNull(actual),
+                () -> assertInstanceOf(DataSource.class, actual)
+        );
+    }
+
+    @Test
+    void salidaEntityManagerFactory() {
         // given
         var entityManagerFactoryBuilder = Mockito.mock(EntityManagerFactoryBuilder.class);
         var builder = Mockito.mock(EntityManagerFactoryBuilder.Builder.class);
@@ -37,13 +48,13 @@ class EntradaJpaConfigurationTest {
         var expected = Mockito.mock(LocalContainerEntityManagerFactoryBean.class);
 
         when(entityManagerFactoryBuilder.dataSource(dataSource)).thenReturn(builder);
-        when(builder.packages(ENTRADA_ENTITY_PACKAGE)).thenReturn(builder);
-        when(builder.persistenceUnit(ENTRADA)).thenReturn(builder);
+        when(builder.packages(SALIDA_ENTITY_PACKAGE)).thenReturn(builder);
+        when(builder.persistenceUnit(SALIDA)).thenReturn(builder);
         when(builder.properties(properties)).thenReturn(builder);
         when(builder.build()).thenReturn(expected);
 
         // when
-        var actual = entradaJpaConfiguration.entradaEntityManagerFactory(entityManagerFactoryBuilder, dataSource);
+        var actual = salidaJpaConfiguration.salidaEntityManagerFactory(entityManagerFactoryBuilder, dataSource);
 
         // then
         assertAll(
@@ -52,20 +63,20 @@ class EntradaJpaConfigurationTest {
         );
 
         verify(entityManagerFactoryBuilder, times(1)).dataSource(dataSource);
-        verify(builder, times(1)).packages(ENTRADA_ENTITY_PACKAGE);
-        verify(builder, times(1)).persistenceUnit(ENTRADA);
+        verify(builder, times(1)).packages(SALIDA_ENTITY_PACKAGE);
+        verify(builder, times(1)).persistenceUnit(SALIDA);
         verify(builder, times(1)).properties(properties);
         verify(builder, times(1)).build();
         verifyNoMoreInteractions(entityManagerFactoryBuilder, builder);
     }
 
     @Test
-    void entradaTransactionManager() {
+    void salidaTransactionManager() {
         // given
         var entityManagerFactory = Mockito.mock(EntityManagerFactory.class);
 
         // when
-        var actual = entradaJpaConfiguration.entradaTransactionManager(entityManagerFactory);
+        var actual = salidaJpaConfiguration.salidaTransactionManager(entityManagerFactory);
 
         // then
         assertNotNull(actual);
