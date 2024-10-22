@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static com.example.batch.application.configuration.Constants.ENTRADA_TRANSACTION_MANAGER;
+import static com.example.batch.infrastructure.configuration.Constants.ENTRADA_TRANSACTION_MANAGER;
 
 @Slf4j
 @Component

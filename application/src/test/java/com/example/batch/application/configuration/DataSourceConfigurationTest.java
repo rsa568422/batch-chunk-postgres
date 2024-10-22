@@ -27,30 +27,6 @@ class DataSourceConfigurationTest {
     }
 
     @Test
-    void entradaDataSource() {
-        // when
-        var actual = dataSourceConfiguration.entradaDataSource();
-
-        // then
-        assertAll(
-                () -> assertNotNull(actual),
-                () -> assertInstanceOf(DataSource.class, actual)
-        );
-    }
-
-    @Test
-    void salidaDataSource() {
-        // when
-        var actual = dataSourceConfiguration.salidaDataSource();
-
-        // then
-        assertAll(
-                () -> assertNotNull(actual),
-                () -> assertInstanceOf(DataSource.class, actual)
-        );
-    }
-
-    @Test
     void batchTransactionManager() {
         // given
         var dataSource = Mockito.mock(DataSource.class);

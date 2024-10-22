@@ -2,7 +2,6 @@ package com.example.batch.infrastructure.mapper;
 
 import com.example.batch.domain.model.DatoEntrada;
 import com.example.batch.infrastructure.Data;
-import com.example.batch.infrastructure.configuration.MapperTestConfig;
 import com.example.batch.infrastructure.entity.entrada.DatoEntradaEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

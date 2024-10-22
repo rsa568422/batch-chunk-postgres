@@ -1,4 +1,4 @@
-package com.example.batch.infrastructure.configuration;
+package com.example.batch.infrastructure.mapper;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

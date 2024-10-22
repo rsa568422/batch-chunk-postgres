@@ -24,9 +24,7 @@ import static com.example.batch.application.configuration.Constants.BASE_PACKAGE
 import static com.example.batch.application.configuration.Constants.BATCH_JOB;
 import static com.example.batch.application.configuration.Constants.BATCH_STEP;
 import static com.example.batch.application.configuration.Constants.BATCH_TRANSACTION_MANAGER;
-import static com.example.batch.application.configuration.Constants.ENTRADA_TRANSACTION_MANAGER;
 import static com.example.batch.application.configuration.Constants.RESULTS_STEP;
-import static com.example.batch.application.configuration.Constants.SALIDA_TRANSACTION_MANAGER;
 import static com.example.batch.application.configuration.Constants.SAMPLE_DATA_STEP;
 
 @Configuration
@@ -49,7 +47,7 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public Step sampleDataStep(@Qualifier(ENTRADA_TRANSACTION_MANAGER) PlatformTransactionManager transactionManager,
+    public Step sampleDataStep(@Qualifier(BATCH_TRANSACTION_MANAGER) PlatformTransactionManager transactionManager,
                                DatosEntradaTasklet datosEntradaTasklet) {
         return new StepBuilder(SAMPLE_DATA_STEP, jobRepository)
                 .tasklet(datosEntradaTasklet, transactionManager)
@@ -70,7 +68,7 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public Step resultsStep(@Qualifier(SALIDA_TRANSACTION_MANAGER) PlatformTransactionManager transactionManager,
+    public Step resultsStep(@Qualifier(BATCH_TRANSACTION_MANAGER) PlatformTransactionManager transactionManager,
                             DatosSalidaTasklet datosSalidaTasklet) {
         return new StepBuilder(RESULTS_STEP, jobRepository)
                 .tasklet(datosSalidaTasklet, transactionManager)

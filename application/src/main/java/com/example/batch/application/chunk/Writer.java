@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.example.batch.application.configuration.Constants.SALIDA_TRANSACTION_MANAGER;
 import static com.example.batch.application.configuration.Constants.UNCHECKED;
+import static com.example.batch.infrastructure.configuration.Constants.SALIDA_TRANSACTION_MANAGER;
 
 @Component
 @RequiredArgsConstructor
