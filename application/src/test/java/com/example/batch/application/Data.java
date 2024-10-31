@@ -30,17 +30,17 @@ public class Data {
 
     public static final DatoSalida SALIDA_1 = DatoSalida.builder()
             .id("cda33687-2f86-4da5-828c-aa7f95a098e3")
-            .total(BigDecimal.valueOf(360))
+            .total(BigDecimal.valueOf(396.0))
             .build();
 
     public static final DatoSalida SALIDA_2 = DatoSalida.builder()
             .id("cf541dc1-7878-4da4-8d49-d53a2d0ccc1e")
-            .total(BigDecimal.valueOf(150))
+            .total(BigDecimal.valueOf(165))
             .build();
 
     public static final DatoSalida SALIDA_3 = DatoSalida.builder()
             .id("9c75bdf7-f9ff-4a79-8c7e-1a5f62401971")
-            .total(BigDecimal.valueOf(200))
+            .total(BigDecimal.valueOf(220))
             .build();
 
     public static final List<DatoSalida> DATOS_SALIDA = List.of(SALIDA_1, SALIDA_2, SALIDA_3);
