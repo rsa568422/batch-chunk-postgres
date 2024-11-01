@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 public class ParameterReader {
 
     @Value("#{jobParameters['param']}")
-    private String param;
+    protected String param;
 
     public BigDecimal getIva() {
         return NumberUtils.createBigDecimal(param);
